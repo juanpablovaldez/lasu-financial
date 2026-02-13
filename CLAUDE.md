@@ -146,3 +146,7 @@ MMKV and FlashList require **development builds** — they don't work in Expo Go
 - `docs/conventions.md` — Naming rules, directory organization, import ordering, TypeScript guidelines
 - `docs/environment.md` — Environment setup, Supabase CLI
 - Expo docs for AI: https://docs.expo.dev/llms-full.txt (general), https://docs.expo.dev/llms-eas.txt (EAS), https://docs.expo.dev/llms-sdk.txt (SDK)
+
+## Writing
+
+- Write the dev content in English but the user content in Spanish
