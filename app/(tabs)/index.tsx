@@ -35,7 +35,7 @@ export default function HomeScreen() {
   );
 
   return (
-    <View className="flex-1 bg-surface-light pt-12 dark:bg-surface-dark">
+    <View className="flex-1 bg-surface-light dark:bg-surface-dark">
       <FlashList
         data={instruments}
         renderItem={renderItem}
