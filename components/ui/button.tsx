@@ -1,6 +1,6 @@
 import { ActivityIndicator, Text, TouchableOpacity } from 'react-native';
 
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
