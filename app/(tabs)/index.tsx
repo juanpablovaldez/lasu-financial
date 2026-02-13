@@ -39,7 +39,6 @@ export default function HomeScreen() {
       <FlashList
         data={instruments}
         renderItem={renderItem}
-        estimatedItemSize={65}
         keyExtractor={(item) => item.id.toString()}
       />
     </View>
