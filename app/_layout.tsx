@@ -1,6 +1,7 @@
 import '../global.css';
 
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { ThemeProvider } from '@react-navigation/native';
+import { PortalHost } from '@rn-primitives/portal';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -9,6 +10,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { NAV_THEME } from '@/lib/constants';
 import { AuthProvider } from '@/providers/auth-provider';
 import { QueryProvider } from '@/providers/query-provider';
 
@@ -30,12 +32,13 @@ export default function RootLayout() {
   return (
     <QueryProvider>
       <AuthProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <ThemeProvider value={NAV_THEME[colorScheme]}>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" options={{ headerShown: false }} />
           </Stack>
           <StatusBar style="auto" />
+          <PortalHost />
         </ThemeProvider>
       </AuthProvider>
     </QueryProvider>

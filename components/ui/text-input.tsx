@@ -1,7 +1,7 @@
 import type { TextInput as RNTextInput } from 'react-native';
 import { TextInput as RNTextInputComponent, Text, View } from 'react-native';
 
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
