@@ -1,5 +1,6 @@
 import { useForm } from '@tanstack/react-form';
 import { Link } from 'expo-router';
+import { Mail } from 'lucide-react-native';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -14,12 +15,6 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/text-input';
 import { supabase } from '@/lib/supabase';
-
-// ─── Icons (using text emojis for MVP) ────────────────────────────────────
-
-function MailIcon() {
-  return <Text className="text-xl">📧</Text>;
-}
 
 // ─── Schema ────────────────────────────────────────────────────────────────
 
@@ -69,7 +64,7 @@ export default function ForgotPasswordScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-surface-dark"
+      className="flex-1 bg-background"
     >
       <ScrollView
         className="flex-1"
@@ -78,8 +73,8 @@ export default function ForgotPasswordScreen() {
       >
         {/* Header */}
         <View className="gap-2">
-          <Text className="text-3xl font-bold text-white">Reset Password</Text>
-          <Text className="text-base text-gray-400">
+          <Text className="text-3xl font-bold text-foreground">Reset Password</Text>
+          <Text className="text-base text-muted-foreground">
             We&apos;ll send you a reset link to your email
           </Text>
         </View>
@@ -87,10 +82,10 @@ export default function ForgotPasswordScreen() {
         {/* Success Message */}
         {successMessage && (
           <View className="rounded-xl border border-green-500 bg-green-500/10 px-4 py-3">
-            <Text className="text-sm text-green-500">{successMessage}</Text>
+            <Text className="text-sm text-green-600">{successMessage}</Text>
             <Link href="/(auth)/sign-in" asChild>
               <TouchableOpacity className="mt-2">
-                <Text className="text-sm font-medium text-green-500">
+                <Text className="text-sm font-medium text-green-600">
                   Volver a Iniciar Sesión →
                 </Text>
               </TouchableOpacity>
@@ -100,8 +95,8 @@ export default function ForgotPasswordScreen() {
 
         {/* Error Banner */}
         {error && (
-          <View className="rounded-xl border border-red-500 bg-red-500/10 px-4 py-3">
-            <Text className="text-sm text-red-500">{error}</Text>
+          <View className="rounded-xl border border-destructive bg-destructive/10 px-4 py-3">
+            <Text className="text-sm text-destructive">{error}</Text>
           </View>
         )}
 
@@ -126,7 +121,7 @@ export default function ForgotPasswordScreen() {
                 onChangeText={field.handleChange}
                 onBlur={field.handleBlur}
                 error={field.state.meta.errors[0] as string | undefined}
-                leftIcon={<MailIcon />}
+                leftIcon={<Mail size={20} className="text-muted-foreground" />}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="email"
@@ -148,10 +143,10 @@ export default function ForgotPasswordScreen() {
 
         {/* Footer */}
         <View className="flex-row items-center justify-center gap-2">
-          <Text className="text-base text-gray-400">¿Recuerdas tu contraseña?</Text>
+          <Text className="text-base text-muted-foreground">¿Recuerdas tu contraseña?</Text>
           <Link href="/(auth)/sign-in" asChild>
             <TouchableOpacity>
-              <Text className="text-base font-medium text-primary-500">Iniciar sesión →</Text>
+              <Text className="text-base font-medium text-primary">Iniciar sesión →</Text>
             </TouchableOpacity>
           </Link>
         </View>

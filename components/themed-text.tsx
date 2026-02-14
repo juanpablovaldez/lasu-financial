@@ -1,6 +1,7 @@
-import { Text, type TextProps } from 'react-native';
+import type { TextProps } from 'react-native';
 
-import { useThemeColor } from '@/hooks/use-theme-color';
+import { Text } from '@/components/ui/text';
+import { cn } from '@/lib/utils';
 
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
@@ -8,14 +9,18 @@ export type ThemedTextProps = TextProps & {
   type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
 };
 
-const typeClassNames: Record<NonNullable<ThemedTextProps['type']>, string> = {
-  default: 'text-base leading-6',
-  title: 'text-[32px] font-bold leading-8',
-  defaultSemiBold: 'text-base leading-6 font-semibold',
-  subtitle: 'text-xl font-bold',
-  link: 'text-base leading-[30px] text-primary-500',
-};
-
+/**
+ * Themed text component that wraps RNR Text with semantic colors.
+ *
+ * Type mappings use semantic color tokens:
+ * - `default`: Base text with foreground color
+ * - `title`: Large bold heading
+ * - `defaultSemiBold`: Semibold base text
+ * - `subtitle`: Medium bold heading
+ * - `link`: Primary colored link text
+ *
+ * @deprecated lightColor and darkColor props - use className with semantic tokens instead
+ */
 export function ThemedText({
   className,
   lightColor,
@@ -23,9 +28,14 @@ export function ThemedText({
   type = 'default',
   ...rest
 }: ThemedTextProps) {
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  // Type mappings with semantic colors
+  const typeClassName = {
+    default: 'text-base leading-6 text-foreground',
+    title: 'text-[32px] font-bold leading-8 text-foreground',
+    defaultSemiBold: 'text-base leading-6 font-semibold text-foreground',
+    subtitle: 'text-xl font-bold text-foreground',
+    link: 'text-base leading-[30px] text-primary',
+  }[type];
 
-  return (
-    <Text className={`${typeClassNames[type]} ${className ?? ''}`} style={{ color }} {...rest} />
-  );
+  return <Text className={cn(typeClassName, className)} {...rest} />;
 }
