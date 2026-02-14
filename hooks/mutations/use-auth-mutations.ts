@@ -11,6 +11,7 @@ import {
   type SignInRequest,
   type SignUpRequest,
 } from '@/schemas';
+import { useAdminStore } from '@/stores/admin-store';
 import { useAuthStore } from '@/stores/auth-store';
 
 // ─── Error Mapping Helper ─────────────────────────────────────────────────
@@ -168,12 +169,14 @@ export function useSignOut() {
       }
     },
     onSuccess: () => {
-      // Clear Zustand store
+      // Clear Zustand stores
       useAuthStore.getState().clearSession();
+      useAdminStore.getState().clearAdminRole();
     },
     onError: () => {
       // Always clear local session even if API fails (graceful degradation)
       useAuthStore.getState().clearSession();
+      useAdminStore.getState().clearAdminRole();
     },
   });
 }

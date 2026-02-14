@@ -10,11 +10,13 @@ import TabBarBackground from '@/components/ui/tab-bar-background';
 import { Colors } from '@/constants/colors';
 import { useAuth } from '@/hooks/use-auth';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useUserGuard } from '@/hooks/use-user-guard';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
   const { session, isLoading, isInitialized } = useAuth();
+  const { isAuthorized: isRegularUser } = useUserGuard();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export default function TabLayout() {
     );
   }
 
-  if (!session) {
+  if (!session || !isRegularUser) {
     return null;
   }
 

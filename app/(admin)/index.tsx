@@ -2,7 +2,6 @@ import { useRouter } from 'expo-router';
 import { RefreshControl, ScrollView, View } from 'react-native';
 
 import { AdminHeader, StatCard } from '@/components/admin';
-import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useAdminDashboard } from '@/hooks/queries/use-admin-dashboard';
 import { formatCurrency } from '@/utils/format';
@@ -103,34 +102,6 @@ export default function AdminDashboardScreen() {
                   title="Operaciones ejecutadas hoy"
                   value={formatCurrency(stats?.operations_today_usd || 0, 'USD', 'es-AR')}
                 />
-              </View>
-            </View>
-
-            {/* Quick Actions */}
-            <View>
-              <Text className="mb-2 text-lg font-semibold">Acciones rápidas</Text>
-              <View className="gap-3">
-                <Button
-                  variant="default"
-                  onPress={() => router.push('/(admin)/transactions' as any)}
-                >
-                  <Text>Ver transacciones pendientes</Text>
-                </Button>
-
-                <Button
-                  variant="outline"
-                  onPress={() => router.push('/(admin)/operations/create' as any)}
-                >
-                  <Text>Crear operación</Text>
-                </Button>
-
-                <Button variant="outline" onPress={() => router.push('/(admin)/users' as any)}>
-                  <Text>Ver usuarios</Text>
-                </Button>
-
-                <Button variant="ghost" onPress={() => router.push('/(admin)/audit-logs' as any)}>
-                  <Text>Registro de auditoría</Text>
-                </Button>
               </View>
             </View>
           </>

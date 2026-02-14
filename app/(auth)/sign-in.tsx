@@ -15,7 +15,9 @@ import { Announcement } from '@/components/ui/announcement';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/text-input';
 import { useSignIn } from '@/hooks/mutations/use-auth-mutations';
+import { supabase } from '@/lib/supabase';
 import { signInRequestSchema } from '@/schemas';
+import { useAdminStore } from '@/stores/admin-store';
 
 // ─── Screen Component ──────────────────────────────────────────────────────
 
@@ -32,7 +34,23 @@ export default function SignInScreen() {
     },
     onSubmit: async ({ value }) => {
       signIn(value, {
-        onSuccess: () => {
+        onSuccess: async (data) => {
+          const userId = data.session?.user?.id;
+          if (userId) {
+            const { data: adminData } = await supabase
+              .from('admin_roles')
+              .select('role')
+              .eq('user_id', userId)
+              .is('revoked_at', null)
+              .single();
+
+            if (adminData?.role === 'super_admin' || adminData?.role === 'admin') {
+              useAdminStore.getState().setAdminRole(adminData.role);
+              router.replace('/(admin)');
+              return;
+            }
+          }
+          useAdminStore.getState().clearAdminRole();
           router.replace('/(tabs)');
         },
       });

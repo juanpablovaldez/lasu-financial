@@ -1,6 +1,7 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { ArrowDownToLine, ArrowUpFromLine } from 'lucide-react-native';
-import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BalanceCard } from '@/components/balance-card';
@@ -10,19 +11,35 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Colors } from '@/constants/colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { balanceKeys } from '@/hooks/queries/use-balance';
+import { transactionKeys } from '@/hooks/queries/use-transactions';
+import { exchangeRateKeys } from '@/hooks/queries/use-exchange-rate';
 
 export default function WalletScreen() {
   const [depositOpen, setDepositOpen] = useState(false);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const iconColor = Colors[colorScheme ?? 'light'].icon;
+  const queryClient = useQueryClient();
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: balanceKeys.all }),
+      queryClient.invalidateQueries({ queryKey: transactionKeys.all }),
+      queryClient.invalidateQueries({ queryKey: exchangeRateKeys.all }),
+    ]);
+    setIsRefreshing(false);
+  }, [queryClient]);
 
   return (
     <>
       <ScrollView
         className="flex-1 bg-background"
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
       >
         <View className="gap-6 p-4">
           {/* Balance Card */}
