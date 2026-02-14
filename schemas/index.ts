@@ -23,3 +23,16 @@ export {
 } from './auth';
 export { instrumentListSchema, instrumentSchema, type Instrument } from './instrument';
 export { userSchema, type User } from './user';
+export {
+  balanceSchema,
+  createTransactionRequestSchema,
+  currencyPreferenceSchema,
+  exchangeRateSchema,
+  transactionListSchema,
+  transactionSchema,
+  type Balance,
+  type CreateTransactionRequest,
+  type CurrencyPreference,
+  type ExchangeRate,
+  type Transaction,
+} from './wallet';
