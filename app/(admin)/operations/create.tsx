@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, ScrollView, View } from 'react-native';
 
+import { UserPickerField } from '@/components/admin/user-picker-field';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
@@ -25,7 +26,7 @@ export default function CreateOperationScreen() {
   const router = useRouter();
   const { mutate: createOperation, isPending } = useCreateOperation();
 
-  const [userId, setUserId] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState('');
   const [operationType, setOperationType] = useState<string>('buy');
   const [totalAmountUsd, setTotalAmountUsd] = useState('');
   const [currency, setCurrency] = useState<string>('USD');
@@ -39,7 +40,7 @@ export default function CreateOperationScreen() {
 
   const handleSubmit = () => {
     const rawData = {
-      user_id: userId.trim(),
+      user_id: selectedUserId,
       operation_type: operationType,
       total_amount_usd: parseFloat(totalAmountUsd) || 0,
       currency,
@@ -76,17 +77,8 @@ export default function CreateOperationScreen() {
       <View className="gap-4 p-4">
         <Text className="text-xl font-bold">Crear operación</Text>
 
-        {/* User ID */}
-        <View className="gap-1">
-          <Text className="text-sm font-medium text-muted-foreground">ID de usuario</Text>
-          <TextInput
-            value={userId}
-            onChangeText={setUserId}
-            placeholder="UUID del usuario"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-        </View>
+        {/* User picker */}
+        <UserPickerField value={selectedUserId} onSelect={setSelectedUserId} />
 
         {/* Operation type */}
         <View className="gap-1">
