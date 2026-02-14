@@ -1,0 +1,88 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { supabase } from '@/lib/supabase';
+import {
+  createTransactionRequestSchema,
+  transactionSchema,
+  type CreateTransactionRequest,
+  type Transaction,
+} from '@/schemas';
+import { useAuthStore } from '@/stores/auth-store';
+
+import { balanceKeys } from '../queries/use-balance';
+import { useExchangeRate } from '../queries/use-exchange-rate';
+import { transactionKeys } from '../queries/use-transactions';
+
+/**
+ * Create a new transaction (deposit or withdrawal).
+ */
+async function createTransaction(
+  request: CreateTransactionRequest,
+  userId: string,
+  exchangeRate?: number,
+): Promise<Transaction> {
+  const validated = createTransactionRequestSchema.parse(request);
+
+  const { data, error } = await supabase
+    .from('transactions')
+    .insert({
+      user_id: userId,
+      type: validated.type,
+      amount: validated.amount,
+      currency: validated.currency,
+      exchange_rate: validated.currency === 'ARS' ? exchangeRate : null,
+      status: 'pending',
+      description: validated.description || null,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Transaction failed: ${error.message}`);
+  }
+
+  const { data: completedData, error: updateError } = await supabase
+    .from('transactions')
+    .update({ status: 'completed' })
+    .eq('id', data.id)
+    .select()
+    .single();
+
+  if (updateError) {
+    throw new Error(`Failed to complete transaction: ${updateError.message}`);
+  }
+
+  return transactionSchema.parse(completedData);
+}
+
+/**
+ * Hook for creating a transaction (deposit or withdrawal).
+ *
+ * @example
+ * ```tsx
+ * const { mutate, isPending, error } = useCreateTransaction();
+ *
+ * mutate({
+ *   type: 'deposit',
+ *   amount: 100,
+ *   currency: 'USD',
+ *   description: 'Initial deposit',
+ * }, {
+ *   onSuccess: () => console.log('Transaction completed'),
+ * });
+ * ```
+ */
+export function useCreateTransaction() {
+  const queryClient = useQueryClient();
+  const userId = useAuthStore((state) => state.userId);
+  const { data: exchangeRate } = useExchangeRate();
+
+  return useMutation({
+    mutationFn: (request: CreateTransactionRequest) =>
+      createTransaction(request, userId!, exchangeRate?.usd_to_ars),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: balanceKeys.all });
+      queryClient.invalidateQueries({ queryKey: transactionKeys.all });
+    },
+  });
+}
