@@ -4,17 +4,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Lasu Financial** is an investment portfolio tracker built with Expo SDK 53 / React Native 0.79. Uses TypeScript strict mode, NativeWind v4 for styling, Supabase for backend, and TanStack Query + Zustand + Zod for state management. Package manager is **pnpm**.
+**Lasu Financial** is a **cross-platform** (iOS, Android, Web) investment portfolio tracker built with Expo SDK 54 / React Native 0.81. Uses TypeScript strict mode, **shadcn-style UI components via [React Native Reusables](https://rnr-docs.vercel.app/)** (@rn-primitives) styled with NativeWind v4, Supabase for backend, and TanStack Query + Zustand + Zod for state management. Package manager is **pnpm**.
+
+**CRITICAL LANGUAGE CONVENTION:**
+
+- **User-facing content** (UI text, labels, error messages, buttons, etc.): **Spanish**
+- **Code** (variables, functions, types, comments, commit messages, documentation): **English**
 
 ## Commands
 
+**All commands use pnpm** — never use npm or yarn.
+
 ```bash
-# Development
+# Development (cross-platform: works on iOS, Android, and Web)
 pnpm start                       # Start Expo dev server
 pnpm start:clear                 # Clear Metro cache and start
 pnpm ios                         # Run on iOS Simulator (builds native)
 pnpm android                     # Run on Android Emulator (builds native)
-pnpm web                         # Start in browser
+pnpm web                         # Start in browser (React Native Web)
 
 # Code quality
 pnpm lint                        # ESLint
@@ -111,6 +118,45 @@ Separated by blank lines. Import sorting is manual.
 - Custom theme colors from `tailwind.config.js`: `primary-{50..950}`, `surface-{light,dark}`, `muted-{light,dark}`
 - Inline styles only for dynamic/animated values from Reanimated
 
+### UI Components (shadcn-style with React Native Reusables)
+
+All UI components in `components/ui/` follow the **React Native Reusables** pattern (shadcn for React Native):
+
+- Built on `@rn-primitives/*` packages for accessibility (ARIA-compliant)
+- Styled with NativeWind using `class-variance-authority` (cva)
+- Unstyled primitives composed with styling utilities
+- Cross-platform compatible (iOS, Android, Web)
+
+**Available UI Components:**
+
+- `button.tsx` — Pressable with variants (default, destructive, outline, secondary, ghost, link) and sizes
+- `text-input.tsx` — Accessible input with label integration
+- `text.tsx` — Typography with context-based styling
+- `alert-dialog.tsx` — Modal dialogs from @rn-primitives/alert-dialog
+- `avatar.tsx` — User avatars from @rn-primitives/avatar
+- `card.tsx`, `separator.tsx`, `label.tsx` — Layout primitives
+- `announcement.tsx` — Screen reader announcements for accessibility
+
+**IMPORTANT**: These components only accept their defined props (variants, sizes, standard Pressable/View props). They do NOT accept custom props like `loading`, `isLoading`, etc. Use composition instead:
+
+```tsx
+// ❌ WRONG - 'loading' prop doesn't exist
+<Button loading={isPending} disabled={isPending}>Submit</Button>
+
+// ✅ CORRECT - use disabled and conditional rendering
+<Button disabled={isPending}>
+  {isPending ? 'Enviando...' : 'Enviar'}
+</Button>
+
+// ✅ CORRECT - compose with conditional icon
+<Button disabled={isPending}>
+  {isPending && <ActivityIndicator size="small" />}
+  <Text>{isPending ? 'Cargando...' : 'Continuar'}</Text>
+</Button>
+```
+
+Reference: [React Native Reusables Docs](https://rnr-docs.vercel.app/)
+
 ### Commit Messages
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `perf:`
@@ -121,23 +167,55 @@ Husky runs lint-staged on pre-commit: ESLint + Prettier on `.ts`/`.tsx`, Prettie
 
 ## Key Libraries
 
-| Purpose      | Library                      | Notes                               |
-| ------------ | ---------------------------- | ----------------------------------- |
-| Routing      | `expo-router`                | File-based, typed routes enabled    |
-| Styling      | `nativewind` v4              | `className` on all RN components    |
-| Server state | `@tanstack/react-query` v5   | Cache + background refresh          |
-| Client state | `zustand` v5                 | Persisted via MMKV                  |
-| Forms        | `@tanstack/react-form` + Zod | Type-safe validation                |
-| Validation   | `zod` v3                     | Runtime validation + type inference |
-| HTTP         | `axios`                      | External APIs only, not Supabase    |
-| Backend      | `@supabase/supabase-js`      | DB, auth, realtime                  |
-| Lists        | `@shopify/flash-list`        | Use instead of FlatList             |
-| Storage      | `react-native-mmkv` v3       | Sync KV store, requires dev build   |
-| Animations   | `react-native-reanimated`    | Native-thread animations            |
+| Purpose       | Library                                                       | Notes                               |
+| ------------- | ------------------------------------------------------------- | ----------------------------------- |
+| Routing       | `expo-router`                                                 | File-based, typed routes enabled    |
+| UI Components | `@rn-primitives/*` (React Native Reusables)                   | shadcn-style accessible primitives  |
+| Styling       | `nativewind` v4 + `class-variance-authority`                  | `className` on all RN components    |
+| Icons         | `lucide-react-native` + `@expo/vector-icons` + `expo-symbols` | Lucide icons + platform icons       |
+| Server state  | `@tanstack/react-query` v5                                    | Cache + background refresh          |
+| Client state  | `zustand` v5                                                  | Persisted via MMKV                  |
+| Forms         | `@tanstack/react-form` + Zod                                  | Type-safe validation                |
+| Validation    | `zod` v3                                                      | Runtime validation + type inference |
+| HTTP          | `axios`                                                       | External APIs only, not Supabase    |
+| Backend       | `@supabase/supabase-js`                                       | DB, auth, realtime                  |
+| Lists         | `@shopify/flash-list`                                         | Use instead of FlatList             |
+| Storage       | `react-native-mmkv` v3                                        | Sync KV store, requires dev build   |
+| Animations    | `react-native-reanimated`                                     | Native-thread animations            |
+| Gestures      | `react-native-gesture-handler`                                | Native gesture recognition          |
+| Utilities     | `clsx` + `tailwind-merge`                                     | Class name utilities                |
 
 ## Troubleshooting
 
+### Development Builds Required
+
 MMKV and FlashList require **development builds** — they don't work in Expo Go. If the app errors in Expo Go, run `pnpm development-builds` or `npx expo run:ios`. New dev builds are also needed after installing packages with native code or config plugins.
+
+### TypeScript Errors with UI Components
+
+If you see errors like `Property 'loading' does not exist on type...` on Button or other UI components:
+
+**Cause**: React Native Reusables components only accept their defined variant props (from cva) plus standard React Native props. They do NOT accept custom props like `loading`, `isLoading`, `icon`, etc.
+
+**Solution**: Use composition with conditional rendering:
+
+```tsx
+// ❌ WRONG - these props don't exist on Button
+<Button loading={isPending} icon={<Mail />}>Submit</Button>
+
+// ✅ CORRECT - compose the button children
+<Button disabled={isPending}>
+  <Mail className="text-primary-foreground" size={16} />
+  <Text>{isPending ? 'Cargando...' : 'Enviar'}</Text>
+</Button>
+```
+
+### Accessibility Requirements
+
+- All interactive components must have `accessibilityLabel` and `accessibilityRole`
+- Use the `Announcement` component for screen reader announcements
+- Form inputs must be wrapped with `Label` component for proper association
+- Custom hooks available: `useFormFocusManagement`, `usePrefersReducedMotion`
 
 ## Documentation
 
@@ -147,6 +225,12 @@ MMKV and FlashList require **development builds** — they don't work in Expo Go
 - `docs/environment.md` — Environment setup, Supabase CLI
 - Expo docs for AI: https://docs.expo.dev/llms-full.txt (general), https://docs.expo.dev/llms-eas.txt (EAS), https://docs.expo.dev/llms-sdk.txt (SDK)
 
-## Writing
+## Cross-Platform Considerations
 
-- Write the dev content in English but the user content in Spanish
+This app runs on **iOS, Android, and Web** via React Native Web. Keep in mind:
+
+- Test features on all three platforms when possible
+- Use `Platform.select()` for platform-specific code
+- Platform-specific files: `*.ios.tsx`, `*.android.tsx`, `*.web.tsx`
+- Some features may need web-specific implementations (see `use-color-scheme.web.ts` for hydration handling)
+- UI components from React Native Reusables are already cross-platform compatible
