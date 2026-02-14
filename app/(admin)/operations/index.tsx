@@ -41,7 +41,6 @@ export default function OperationsScreen() {
               onPress={() => router.push(`/(admin)/operations/${item.id}` as any)}
             />
           )}
-          estimatedItemSize={150}
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
           refreshControl={
             <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#fff" />

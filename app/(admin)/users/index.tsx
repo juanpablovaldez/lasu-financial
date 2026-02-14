@@ -41,7 +41,6 @@ export default function UsersScreen() {
             }
           />
         )}
-        estimatedItemSize={120}
         contentContainerStyle={{ padding: 16 }}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#fff" />

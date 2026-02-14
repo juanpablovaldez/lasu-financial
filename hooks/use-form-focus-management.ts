@@ -1,10 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { createRef, useEffect, useRef } from 'react';
 import type { TextInput } from 'react-native';
 
 /**
  * Type for a map of field names to their refs
  */
-export type FieldRefsMap = Record<string, React.RefObject<TextInput>>;
+export type FieldRefsMap = Record<string, React.RefObject<TextInput | null>>;
 
 /**
  * Hook to automatically focus the first field with an error after form submission.
@@ -91,15 +91,15 @@ export function useFormFocusManagement(
  */
 export function useFieldRefs<T extends string>(
   fieldNames: readonly T[],
-): Record<T, React.RefObject<TextInput>> {
-  const refs = useRef<Record<string, React.RefObject<TextInput>>>({});
+): Record<T, React.RefObject<TextInput | null>> {
+  const refs = useRef<Record<string, React.RefObject<TextInput | null>>>({});
 
   // Initialize refs for each field
   fieldNames.forEach((name) => {
     if (!refs.current[name]) {
-      refs.current[name] = { current: null };
+      refs.current[name] = createRef<TextInput>();
     }
   });
 
-  return refs.current as Record<T, React.RefObject<TextInput>>;
+  return refs.current as Record<T, React.RefObject<TextInput | null>>;
 }
