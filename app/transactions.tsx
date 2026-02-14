@@ -1,10 +1,11 @@
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
-import { useTransactions } from '@/hooks/queries/use-transactions';
+import { useInfiniteTransactions } from '@/hooks/queries/use-infinite-transactions';
 import { cn } from '@/lib/utils';
 import type { Transaction } from '@/schemas';
 import { formatCurrency } from '@/utils/format';
@@ -18,7 +19,6 @@ function TransactionItem({ item }: { item: Transaction }) {
     hour: '2-digit',
     minute: '2-digit',
   });
-
   const locale = item.currency === 'USD' ? 'en-US' : 'es-AR';
 
   return (
@@ -54,13 +54,16 @@ function TransactionItem({ item }: { item: Transaction }) {
   );
 }
 
-export function TransactionList() {
-  const router = useRouter();
-  const { data: transactions, isLoading, error } = useTransactions(5);
+export default function TransactionsScreen() {
+  const insets = useSafeAreaInsets();
+  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteTransactions();
+
+  const transactions = data?.pages.flatMap((page) => page.transactions) ?? [];
 
   if (isLoading) {
     return (
-      <View className="items-center py-8">
+      <View className="flex-1 items-center justify-center bg-background">
         <ActivityIndicator size="large" />
       </View>
     );
@@ -68,32 +71,40 @@ export function TransactionList() {
 
   if (error) {
     return (
-      <View className="items-center py-8">
-        <Text className="text-destructive">Error al cargar transacciones</Text>
+      <View className="flex-1 items-center justify-center bg-background px-4">
+        <Text className="text-center text-destructive">Error al cargar transacciones</Text>
       </View>
     );
   }
 
-  if (!transactions || transactions.length === 0) {
+  if (transactions.length === 0) {
     return (
-      <View className="items-center py-8">
-        <Text className="text-muted-foreground">No hay transacciones recientes</Text>
+      <View className="flex-1 items-center justify-center bg-background">
+        <Text className="text-muted-foreground">No hay transacciones</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1">
-      <View className="mb-4 flex-row items-center justify-between gap-2">
-        <Text className="text-lg font-semibold">Actividad reciente</Text>
-        <Pressable onPress={() => router.push('/transactions')}>
-          <Text className="text-sm text-primary-500">Ver todas</Text>
-        </Pressable>
-      </View>
+    <View className="flex-1 bg-background">
       <FlashList
         data={transactions}
         renderItem={({ item }) => <TransactionItem item={item} />}
         keyExtractor={(item) => item.id}
+        contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 16 }}
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          isFetchingNextPage ? (
+            <View className="items-center py-4">
+              <ActivityIndicator size="small" />
+            </View>
+          ) : null
+        }
       />
     </View>
   );

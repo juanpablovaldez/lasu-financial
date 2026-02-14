@@ -35,6 +35,20 @@ export default function RootLayout() {
         <ThemeProvider value={NAV_THEME[colorScheme]}>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="transactions"
+              options={{
+                title: 'Todas las transacciones',
+                headerBackTitle: 'Volver',
+              }}
+            />
+            <Stack.Screen
+              name="transaction/[id]"
+              options={{
+                title: 'Detalle de transacción',
+                headerBackTitle: 'Volver',
+              }}
+            />
             <Stack.Screen name="+not-found" options={{ headerShown: false }} />
           </Stack>
           <StatusBar style="auto" />
