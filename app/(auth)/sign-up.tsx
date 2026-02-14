@@ -1,5 +1,6 @@
 import { useForm } from '@tanstack/react-form';
 import { Link, useRouter } from 'expo-router';
+import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react-native';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -15,24 +16,6 @@ import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/text-input';
 import { useSignUp } from '@/hooks/mutations/use-auth-mutations';
 import { signUpRequestSchema } from '@/schemas';
-
-// ─── Icons (using text emojis for MVP) ────────────────────────────────────
-
-function UserIcon() {
-  return <Text className="text-xl">👤</Text>;
-}
-
-function MailIcon() {
-  return <Text className="text-xl">📧</Text>;
-}
-
-function LockIcon() {
-  return <Text className="text-xl">🔒</Text>;
-}
-
-function EyeIcon({ visible }: { visible: boolean }) {
-  return <Text className="text-xl">{visible ? '👁' : '🔒'}</Text>;
-}
 
 // ─── Screen Component ──────────────────────────────────────────────────────
 
@@ -79,7 +62,7 @@ export default function SignUpScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-surface-dark"
+      className="flex-1 bg-background"
     >
       <ScrollView
         className="flex-1"
@@ -88,17 +71,17 @@ export default function SignUpScreen() {
       >
         {/* Header */}
         <View className="gap-2">
-          <Text className="text-3xl font-bold text-white">Crear cuenta</Text>
-          <Text className="text-base text-gray-400">Únete a miles de inversores</Text>
+          <Text className="text-3xl font-bold text-foreground">Crear cuenta</Text>
+          <Text className="text-base text-muted-foreground">Únete a miles de inversores</Text>
         </View>
 
         {/* Success Message */}
         {successMessage && (
           <View className="rounded-xl border border-green-500 bg-green-500/10 px-4 py-3">
-            <Text className="text-sm text-green-500">{successMessage}</Text>
+            <Text className="text-sm text-green-600">{successMessage}</Text>
             <Link href="/(auth)/sign-in" asChild>
               <TouchableOpacity className="mt-2">
-                <Text className="text-sm font-medium text-green-500">Ir a Iniciar Sesión →</Text>
+                <Text className="text-sm font-medium text-green-600">Ir a Iniciar Sesión →</Text>
               </TouchableOpacity>
             </Link>
           </View>
@@ -106,8 +89,8 @@ export default function SignUpScreen() {
 
         {/* Error Banner */}
         {error && (
-          <View className="rounded-xl border border-red-500 bg-red-500/10 px-4 py-3">
-            <Text className="text-sm text-red-500">{error.message}</Text>
+          <View className="rounded-xl border border-destructive bg-destructive/10 px-4 py-3">
+            <Text className="text-sm text-destructive">{error.message}</Text>
           </View>
         )}
 
@@ -122,7 +105,7 @@ export default function SignUpScreen() {
                 value={field.state.value}
                 onChangeText={field.handleChange}
                 onBlur={field.handleBlur}
-                leftIcon={<UserIcon />}
+                leftIcon={<User size={20} className="text-muted-foreground" />}
                 autoCapitalize="words"
                 autoComplete="name"
                 autoFocus
@@ -149,7 +132,7 @@ export default function SignUpScreen() {
                 onChangeText={field.handleChange}
                 onBlur={field.handleBlur}
                 error={field.state.meta.errors[0] as string | undefined}
-                leftIcon={<MailIcon />}
+                leftIcon={<Mail size={20} className="text-muted-foreground" />}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="email"
@@ -176,10 +159,14 @@ export default function SignUpScreen() {
                 onChangeText={field.handleChange}
                 onBlur={field.handleBlur}
                 error={field.state.meta.errors[0] as string | undefined}
-                leftIcon={<LockIcon />}
+                leftIcon={<Lock size={20} className="text-muted-foreground" />}
                 rightIcon={
                   <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    <EyeIcon visible={showPassword} />
+                    {showPassword ? (
+                      <Eye size={20} className="text-muted-foreground" />
+                    ) : (
+                      <EyeOff size={20} className="text-muted-foreground" />
+                    )}
                   </TouchableOpacity>
                 }
                 secureTextEntry={!showPassword}
@@ -220,10 +207,14 @@ export default function SignUpScreen() {
                 onChangeText={field.handleChange}
                 onBlur={field.handleBlur}
                 error={field.state.meta.errors[0] as string | undefined}
-                leftIcon={<LockIcon />}
+                leftIcon={<Lock size={20} className="text-muted-foreground" />}
                 rightIcon={
                   <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-                    <EyeIcon visible={showConfirmPassword} />
+                    {showConfirmPassword ? (
+                      <Eye size={20} className="text-muted-foreground" />
+                    ) : (
+                      <EyeOff size={20} className="text-muted-foreground" />
+                    )}
                   </TouchableOpacity>
                 }
                 secureTextEntry={!showConfirmPassword}
@@ -244,10 +235,10 @@ export default function SignUpScreen() {
 
         {/* Footer */}
         <View className="flex-row items-center justify-center gap-2">
-          <Text className="text-base text-gray-400">¿Ya tienes una cuenta?</Text>
+          <Text className="text-base text-muted-foreground">¿Ya tienes una cuenta?</Text>
           <Link href="/(auth)/sign-in" asChild>
             <TouchableOpacity>
-              <Text className="text-base font-medium text-primary-500">Iniciar sesión</Text>
+              <Text className="text-base font-medium text-primary">Iniciar sesión</Text>
             </TouchableOpacity>
           </Link>
         </View>

@@ -4,7 +4,6 @@ import { Animated, Dimensions, Pressable, Text, TouchableOpacity, View } from 'r
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/hooks/use-auth';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/stores/app-store';
 
@@ -25,7 +24,6 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
   const { session } = useAuth();
   const { themeMode, setThemeMode } = useAppStore();
   const { isPhone } = useDevice();
-  const colorScheme = useColorScheme();
   const slideAnim = useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
   const isAnimating = useRef(false);
@@ -105,24 +103,21 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
           transform: [{ translateX: slideAnim }],
           width: SIDEBAR_WIDTH,
           height: SIDEBAR_HEIGHT,
-          backgroundColor: colorScheme === 'dark' ? '#151718' : '#ffffff',
         }}
-        className="absolute bottom-0 left-0 top-0 shadow-2xl"
+        className="absolute bottom-0 left-0 top-0 bg-background shadow-2xl"
       >
         <View className="flex-1 pt-16">
           {/* User header */}
-          <View className="border-b border-gray-200 px-5 pb-5 dark:border-gray-700">
+          <View className="border-b border-border px-5 pb-5">
             <View className="flex-row items-center gap-3">
-              <View className="h-14 w-14 items-center justify-center rounded-full border-2 border-primary-300 bg-orange-100 dark:border-primary-600 dark:bg-slate-600">
-                <Text className="text-xl font-bold text-gray-800 dark:text-gray-100">
+              <View className="h-14 w-14 items-center justify-center rounded-full border-2 border-primary bg-muted">
+                <Text className="text-xl font-bold text-foreground">
                   {email?.charAt(0).toUpperCase()}
                 </Text>
               </View>
               <View className="flex-1">
-                <Text className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                  {displayName}
-                </Text>
-                <Text className="text-sm text-muted-light dark:text-muted-dark">{email}</Text>
+                <Text className="text-lg font-bold text-foreground">{displayName}</Text>
+                <Text className="text-sm text-muted-foreground">{email}</Text>
               </View>
               <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
                 <IconSymbol name="xmark" size={22} color="#9BA1A6" />
@@ -131,18 +126,16 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
           </View>
 
           {/* Session info */}
-          <View className="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
-            <Text className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-light dark:text-muted-dark">
+          <View className="border-b border-border px-5 py-4">
+            <Text className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Sesión
             </Text>
-            <Text className="text-sm text-gray-700 dark:text-gray-300">
-              Último inicio de sesión: {lastSignIn}
-            </Text>
+            <Text className="text-sm text-foreground">Último inicio de sesión: {lastSignIn}</Text>
           </View>
 
           {/* Theme switcher */}
-          <View className="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
-            <Text className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-light dark:text-muted-dark">
+          <View className="border-b border-border px-5 py-4">
+            <Text className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Apariencia
             </Text>
             <View className="flex-row gap-2">
@@ -154,15 +147,13 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
                     onPress={() => setThemeMode(mode)}
                     activeOpacity={0.7}
                     className={`flex-1 flex-row items-center justify-center gap-1.5 rounded-lg py-2.5 ${
-                      isActive
-                        ? 'bg-primary-500/15 dark:bg-primary-500/20'
-                        : 'bg-gray-100 dark:bg-slate-700'
+                      isActive ? 'bg-primary/10' : 'bg-muted'
                     }`}
                   >
                     <IconSymbol name={icon} size={16} color={isActive ? '#3b82f6' : '#9BA1A6'} />
                     <Text
                       className={`text-xs font-medium ${
-                        isActive ? 'text-primary-500' : 'text-gray-600 dark:text-gray-400'
+                        isActive ? 'text-primary' : 'text-muted-foreground'
                       }`}
                     >
                       {label}
@@ -177,18 +168,14 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
           <View className="flex-1" />
 
           {/* Sign out */}
-          <View
-            className={`border-t border-gray-200 px-5 ${isPhone ? 'py-8' : 'py-4'} dark:border-gray-700`}
-          >
+          <View className={`border-t border-border px-5 ${isPhone ? 'py-8' : 'py-4'}`}>
             <TouchableOpacity
               onPress={handleSignOut}
               activeOpacity={0.7}
-              className="flex-row items-center gap-3 rounded-lg bg-red-50 px-4 py-3 dark:bg-red-950/30"
+              className="flex-row items-center gap-3 rounded-lg bg-destructive/10 px-4 py-3"
             >
               <IconSymbol name="rectangle.portrait.and.arrow.right" size={20} color="#ef4444" />
-              <Text className="text-base font-semibold text-red-600 dark:text-red-400">
-                Cerrar sesión
-              </Text>
+              <Text className="text-base font-semibold text-destructive">Cerrar sesión</Text>
             </TouchableOpacity>
           </View>
         </View>

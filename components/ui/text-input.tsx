@@ -1,6 +1,9 @@
 import type { TextInput as RNTextInput } from 'react-native';
-import { TextInput as RNTextInputComponent, Text, View } from 'react-native';
+import { View } from 'react-native';
 
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Text } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
@@ -15,13 +18,12 @@ export interface TextInputProps extends React.ComponentProps<typeof RNTextInput>
 // ─── Component ─────────────────────────────────────────────────────────────
 
 /**
- * Custom text input component with dark theme styling.
+ * Compatibility wrapper for RNR Input that maintains the legacy API.
  *
  * Features:
- * - Label with uppercase tracking
+ * - Label with uppercase tracking (semantic colors)
  * - Optional icons (left and right)
- * - Error state with border and message
- * - Semi-transparent dark background
+ * - Error state with border and message (semantic destructive colors)
  * - Full accessibility support
  *
  * @example
@@ -31,7 +33,7 @@ export interface TextInputProps extends React.ComponentProps<typeof RNTextInput>
  *   value={email}
  *   onChangeText={setEmail}
  *   error={errors.email}
- *   leftIcon={<MailIcon />}
+ *   leftIcon={<Mail size={20} className="text-muted-foreground" />}
  *   keyboardType="email-address"
  *   autoCapitalize="none"
  * />
@@ -48,27 +50,30 @@ export function TextInput({
   return (
     <View className="gap-2">
       {label && (
-        <Text className="text-sm font-medium uppercase tracking-wide text-gray-400">{label}</Text>
+        <Label className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+          {label}
+        </Label>
       )}
 
       <View
         className={cn(
-          'flex-row items-center gap-3 rounded-xl bg-gray-800/50 px-4 py-3.5',
-          error && 'border border-red-500',
+          'flex-row items-center gap-3 rounded-xl bg-input px-4 py-3.5',
+          error && 'border border-destructive',
         )}
       >
         {leftIcon}
 
-        <RNTextInputComponent
-          className={cn('flex-1 text-base text-white', className)}
-          placeholderTextColor="#6B7280"
+        <Input
+          className={cn('flex-1 border-0 bg-transparent p-0 shadow-none', className)}
+          placeholderClassName="text-muted-foreground"
+          aria-invalid={!!error}
           {...props}
         />
 
         {rightIcon}
       </View>
 
-      {error && <Text className="text-sm text-red-500">{error}</Text>}
+      {error && <Text className="text-sm text-destructive">{error}</Text>}
     </View>
   );
 }

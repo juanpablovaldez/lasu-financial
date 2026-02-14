@@ -1,6 +1,7 @@
 import { FlashList } from '@shopify/flash-list';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 
+import { Text } from '@/components/ui/text';
 import { useInstruments } from '@/hooks/queries/use-instruments';
 import type { Instrument } from '@/schemas';
 
@@ -9,7 +10,7 @@ export default function HomeScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-surface-light dark:bg-surface-dark">
+      <View className="flex-1 items-center justify-center bg-background">
         <ActivityIndicator size="large" />
       </View>
     );
@@ -17,8 +18,8 @@ export default function HomeScreen() {
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-surface-light px-4 dark:bg-surface-dark">
-        <Text className="text-center text-red-500">
+      <View className="flex-1 items-center justify-center bg-background px-4">
+        <Text className="text-center text-destructive">
           Failed to load instruments: {error.message}
         </Text>
       </View>
@@ -26,16 +27,14 @@ export default function HomeScreen() {
   }
 
   const renderItem = ({ item }: { item: Instrument }) => (
-    <View className="border-b border-gray-200 px-4 py-4 dark:border-gray-700">
-      <Text className="text-base text-gray-900 dark:text-gray-100">{item.name}</Text>
-      {item.symbol && (
-        <Text className="mt-0.5 text-sm text-muted-light dark:text-muted-dark">{item.symbol}</Text>
-      )}
+    <View className="border-b border-border px-4 py-4">
+      <Text className="text-base text-foreground">{item.name}</Text>
+      {item.symbol && <Text className="mt-0.5 text-sm text-muted-foreground">{item.symbol}</Text>}
     </View>
   );
 
   return (
-    <View className="flex-1 bg-surface-light dark:bg-surface-dark">
+    <View className="flex-1 bg-background">
       <FlashList
         data={instruments}
         renderItem={renderItem}
