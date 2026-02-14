@@ -1,53 +1,14 @@
-import { FlashList } from '@shopify/flash-list';
-import { ActivityIndicator, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
-import { useInstruments } from '@/hooks/queries/use-instruments';
-import type { Instrument } from '@/schemas';
 
 export default function HomeScreen() {
-  const { data: instruments, isLoading, error } = useInstruments();
-
-  if (isLoading) {
-    return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View className="flex-1 items-center justify-center bg-background px-4">
-        <Text className="text-center text-destructive">
-          Failed to load instruments: {error.message}
-        </Text>
-      </View>
-    );
-  }
-
-  const renderItem = ({ item }: { item: Instrument }) => (
-    <View className="border-b border-border px-4 py-4">
-      <View className="min-w-0 flex-1">
-        <Text className="text-base font-medium text-foreground" numberOfLines={1}>
-          {item.name}
-        </Text>
-        {item.symbol && (
-          <Text className="mt-0.5 text-sm text-muted-foreground" numberOfLines={1}>
-            {item.symbol}
-          </Text>
-        )}
-      </View>
-    </View>
-  );
-
   return (
-    <View className="flex-1 bg-background">
-      <FlashList
-        data={instruments}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-      />
+    <View className="flex-1 items-center justify-center bg-background px-4">
+      <Text className="text-lg font-semibold text-foreground">Inicio</Text>
+      <Text className="mt-2 text-center text-muted-foreground">
+        Próximamente: tu portafolio de inversiones
+      </Text>
     </View>
   );
 }

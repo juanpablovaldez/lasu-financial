@@ -15,7 +15,6 @@ import {
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Text as UIText } from '@/components/ui/text';
 import { useSignOut } from '@/hooks/mutations/use-auth-mutations';
-import { useAdminRole } from '@/hooks/use-admin-role';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppStore } from '@/stores/app-store';
 
@@ -39,7 +38,6 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
   const { isPhone, isDesktop } = useDevice();
   const prefersReducedMotion = usePrefersReducedMotion();
   const { mutate: signOut, isPending: isSigningOut } = useSignOut();
-  const { isAdmin } = useAdminRole();
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const slideAnim = useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
@@ -176,25 +174,6 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
             </Text>
             <Text className="text-sm text-foreground">Último inicio de sesión: {lastSignIn}</Text>
           </View>
-
-          {/* Admin Panel Link */}
-          {isAdmin && (
-            <View className="border-b border-border px-5 py-4">
-              <TouchableOpacity
-                onPress={() => {
-                  onClose();
-                  router.push('/(admin)' as any);
-                }}
-                activeOpacity={0.7}
-                className="flex-row items-center gap-3 rounded-lg bg-primary/10 px-4 py-3"
-              >
-                <IconSymbol name="shield.lefthalf.filled" size={20} color="#3b82f6" />
-                <Text className="text-base font-semibold text-primary">
-                  Panel de administración
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
 
           {/* Theme switcher */}
           <View className="border-b border-border px-5 py-4">

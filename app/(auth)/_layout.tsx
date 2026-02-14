@@ -3,18 +3,24 @@ import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 import { useAuth } from '@/hooks/use-auth';
+import { useAdminStore } from '@/stores/admin-store';
 
 export default function AuthLayout() {
   const router = useRouter();
   const { session, isLoading, isInitialized } = useAuth();
+  const { isAdmin, isHydrated } = useAdminStore();
 
   useEffect(() => {
-    if (isInitialized && !isLoading && session) {
-      router.replace('/(tabs)');
+    if (isInitialized && !isLoading && isHydrated && session) {
+      if (isAdmin) {
+        router.replace('/(admin)');
+      } else {
+        router.replace('/(tabs)');
+      }
     }
-  }, [session, isLoading, isInitialized, router]);
+  }, [session, isLoading, isInitialized, isHydrated, isAdmin, router]);
 
-  if (!isInitialized || isLoading) {
+  if (!isInitialized || isLoading || !isHydrated) {
     return (
       <View className="flex-1 items-center justify-center bg-surface-dark">
         <ActivityIndicator size="large" color="#3b82f6" />
