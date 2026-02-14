@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ContactSupportCard } from '@/components/contact-support-card';
 import { TransactionDialog } from '@/components/transaction-dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
@@ -119,6 +120,7 @@ export default function TransactionsScreen() {
         <View className="flex-1 items-center justify-center">
           <Text className="text-muted-foreground">No hay transacciones</Text>
         </View>
+        <ContactSupportCard />
         <TransactionDialog open={depositOpen} onOpenChange={setDepositOpen} type="deposit" />
         <TransactionDialog open={withdrawOpen} onOpenChange={setWithdrawOpen} type="withdrawal" />
       </View>
@@ -139,19 +141,22 @@ export default function TransactionsScreen() {
               onWithdraw={() => setWithdrawOpen(true)}
             />
           }
+          ListFooterComponent={
+            <>
+              {isFetchingNextPage ? (
+                <View className="items-center py-4">
+                  <ActivityIndicator size="small" />
+                </View>
+              ) : null}
+              <ContactSupportCard />
+            </>
+          }
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
               fetchNextPage();
             }
           }}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={
-            isFetchingNextPage ? (
-              <View className="items-center py-4">
-                <ActivityIndicator size="small" />
-              </View>
-            ) : null
-          }
         />
       </View>
       <TransactionDialog open={depositOpen} onOpenChange={setDepositOpen} type="deposit" />
