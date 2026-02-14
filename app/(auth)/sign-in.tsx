@@ -51,9 +51,7 @@ export default function SignInScreen() {
       >
         {/* Header */}
         <View className="gap-2">
-          <Text variant="h1" className="text-left text-3xl font-bold text-foreground">
-            Bienvenido de nuevo
-          </Text>
+          <Text className="text-left text-3xl font-bold text-foreground">Bienvenido de nuevo</Text>
           <Text className="text-base text-muted-foreground">
             Accede a tu portafolio de forma segura
           </Text>

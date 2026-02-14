@@ -1,10 +1,21 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef } from 'react';
-import { Alert, Animated, Dimensions, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Animated, Dimensions, Pressable, Text, TouchableOpacity, View } from 'react-native';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Text as UIText } from '@/components/ui/text';
+import { useSignOut } from '@/hooks/mutations/use-auth-mutations';
 import { useAuth } from '@/hooks/use-auth';
-import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/stores/app-store';
 
 import { useDevice } from '@/hooks/use-device';
@@ -12,7 +23,7 @@ import { useDismiss } from '@/hooks/use-dismiss';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { formatDate } from '@/utils/format-date';
 
-const SIDEBAR_WIDTH = Dimensions.get('window').width * 0.78;
+const SIDEBAR_WIDTH = Dimensions.get('window').width * 0.7;
 const SIDEBAR_HEIGHT = Dimensions.get('window').height * 1;
 
 interface SidebarProps {
@@ -26,6 +37,8 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
   const { themeMode, setThemeMode } = useAppStore();
   const { isPhone, isDesktop } = useDevice();
   const prefersReducedMotion = usePrefersReducedMotion();
+  const { mutate: signOut, isPending: isSigningOut } = useSignOut();
+  const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const slideAnim = useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
   const isAnimating = useRef(false);
@@ -77,28 +90,20 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
       });
     }
   }, [visible, slideAnim, backdropAnim, prefersReducedMotion]);
+
   const handleSignOut = useCallback(() => {
-    Alert.alert(
-      'Cerrar sesión',
-      '¿Estás seguro de que quieres cerrar sesión?',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Cerrar sesión',
-          style: 'destructive',
-          onPress: async () => {
-            onClose();
-            await supabase.auth.signOut();
-            router.replace('/(auth)/sign-in');
-          },
-        },
-      ],
-      { cancelable: true },
-    );
-  }, [onClose, router]);
+    setShowSignOutDialog(true);
+  }, []);
+
+  const executeSignOut = useCallback(() => {
+    setShowSignOutDialog(false);
+    onClose();
+    signOut(undefined, {
+      onSuccess: () => {
+        router.replace('/(auth)/sign-in');
+      },
+    });
+  }, [onClose, router, signOut]);
 
   const themeModes = [
     { mode: 'light' as const, label: 'Claro', icon: 'sun.max.fill' as const },
@@ -209,14 +214,37 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
             <TouchableOpacity
               onPress={handleSignOut}
               activeOpacity={0.7}
+              disabled={isSigningOut}
               className="flex-row items-center gap-3 rounded-lg bg-destructive/10 px-4 py-3"
             >
               <IconSymbol name="rectangle.portrait.and.arrow.right" size={20} color="#ef4444" />
-              <Text className="text-base font-semibold text-destructive">Cerrar sesión</Text>
+              <Text className="text-base font-semibold text-destructive">
+                {isSigningOut ? 'Cerrando sesión...' : 'Cerrar sesión'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
       </Animated.View>
+
+      {/* Sign out confirmation dialog */}
+      <AlertDialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cerrar sesión</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que quieres cerrar sesión?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSigningOut}>
+              <UIText>Cancelar</UIText>
+            </AlertDialogCancel>
+            <AlertDialogAction onPress={executeSignOut} disabled={isSigningOut}>
+              <UIText>{isSigningOut ? 'Cerrando...' : 'Cerrar sesión'}</UIText>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </View>
   );
 }
