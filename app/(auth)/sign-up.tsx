@@ -72,9 +72,7 @@ export default function SignUpScreen() {
       >
         {/* Header */}
         <View className="gap-2">
-          <Text variant="h1" className="text-left text-3xl font-bold text-foreground">
-            Crear cuenta
-          </Text>
+          <Text className="text-left text-3xl font-bold text-foreground">Crear cuenta</Text>
           <Text className="text-base text-muted-foreground">Únete a miles de inversores</Text>
         </View>
 
@@ -186,12 +184,9 @@ export default function SignUpScreen() {
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
                   autoComplete="password-new"
-                  accessibilityDescribedBy="password-requirements"
+                  accessibilityHint="Mínimo 8 caracteres, incluye mayúsculas, minúsculas y números"
                 />
-                <Text
-                  nativeID="password-requirements"
-                  className="mt-1.5 text-xs text-muted-foreground"
-                >
+                <Text className="mt-1.5 text-xs text-muted-foreground">
                   Mínimo 8 caracteres, incluye mayúsculas, minúsculas y números
                 </Text>
               </View>

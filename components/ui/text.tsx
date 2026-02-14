@@ -16,19 +16,19 @@ const textVariants = cva(
       variant: {
         default: '',
         h1: cn(
-          'text-center text-4xl font-extrabold tracking-tight',
+          'font-extrabold text-4xl text-center tracking-tight',
           Platform.select({ web: 'scroll-m-20 text-balance' }),
         ),
         h2: cn(
-          'border-border border-b pb-2 text-3xl font-semibold tracking-tight',
+          'pb-2 border-border border-b font-semibold text-3xl tracking-tight',
           Platform.select({ web: 'scroll-m-20 first:mt-0' }),
         ),
-        h3: cn('text-2xl font-semibold tracking-tight', Platform.select({ web: 'scroll-m-20' })),
-        h4: cn('text-xl font-semibold tracking-tight', Platform.select({ web: 'scroll-m-20' })),
+        h3: cn('font-semibold text-2xl tracking-tight', Platform.select({ web: 'scroll-m-20' })),
+        h4: cn('font-semibold text-xl tracking-tight', Platform.select({ web: 'scroll-m-20' })),
         p: 'mt-3 leading-7 sm:mt-6',
         blockquote: 'mt-4 border-l-2 pl-3 italic sm:mt-6 sm:pl-6',
         code: cn(
-          'bg-muted relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold',
+          'relative bg-muted px-[0.3rem] py-[0.2rem] rounded font-mono font-semibold text-sm',
         ),
         lead: 'text-muted-foreground text-xl',
         large: 'text-lg font-semibold',
