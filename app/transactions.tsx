@@ -1,14 +1,44 @@
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
+import { ArrowDownToLine, ArrowUpFromLine } from 'lucide-react-native';
+import { useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { TransactionDialog } from '@/components/transaction-dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { useInfiniteTransactions } from '@/hooks/queries/use-infinite-transactions';
 import { cn } from '@/lib/utils';
 import type { Transaction } from '@/schemas';
 import { formatCurrency } from '@/utils/format';
+
+function ActionCards({ onDeposit, onWithdraw }: { onDeposit: () => void; onWithdraw: () => void }) {
+  return (
+    <View className="flex-row gap-3 pb-4">
+      <Pressable className="flex-1" onPress={onDeposit}>
+        <Card className="border-green-200 dark:border-green-800/40">
+          <CardContent className="items-center gap-2 py-5">
+            <View className="h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+              <ArrowDownToLine size={22} color="#16a34a" />
+            </View>
+            <Text className="text-sm font-semibold">Solicitar depósito</Text>
+          </CardContent>
+        </Card>
+      </Pressable>
+      <Pressable className="flex-1" onPress={onWithdraw}>
+        <Card className="border-red-200 dark:border-red-800/40">
+          <CardContent className="items-center gap-2 py-5">
+            <View className="h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+              <ArrowUpFromLine size={22} color="#dc2626" />
+            </View>
+            <Text className="text-sm font-semibold">Solicitar retiro</Text>
+          </CardContent>
+        </Card>
+      </Pressable>
+    </View>
+  );
+}
 
 function TransactionItem({ item }: { item: Transaction }) {
   const router = useRouter();
@@ -56,6 +86,8 @@ function TransactionItem({ item }: { item: Transaction }) {
 
 export default function TransactionsScreen() {
   const insets = useSafeAreaInsets();
+  const [depositOpen, setDepositOpen] = useState(false);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteTransactions();
 
@@ -79,33 +111,51 @@ export default function TransactionsScreen() {
 
   if (transactions.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <Text className="text-muted-foreground">No hay transacciones</Text>
+      <View className="flex-1 bg-background p-4">
+        <ActionCards
+          onDeposit={() => setDepositOpen(true)}
+          onWithdraw={() => setWithdrawOpen(true)}
+        />
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-muted-foreground">No hay transacciones</Text>
+        </View>
+        <TransactionDialog open={depositOpen} onOpenChange={setDepositOpen} type="deposit" />
+        <TransactionDialog open={withdrawOpen} onOpenChange={setWithdrawOpen} type="withdrawal" />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-background">
-      <FlashList
-        data={transactions}
-        renderItem={({ item }) => <TransactionItem item={item} />}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 16 }}
-        onEndReached={() => {
-          if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
+    <>
+      <View className="flex-1 bg-background">
+        <FlashList
+          data={transactions}
+          renderItem={({ item }) => <TransactionItem item={item} />}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 16 }}
+          ListHeaderComponent={
+            <ActionCards
+              onDeposit={() => setDepositOpen(true)}
+              onWithdraw={() => setWithdrawOpen(true)}
+            />
           }
-        }}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          isFetchingNextPage ? (
-            <View className="items-center py-4">
-              <ActivityIndicator size="small" />
-            </View>
-          ) : null
-        }
-      />
-    </View>
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
+            }
+          }}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <View className="items-center py-4">
+                <ActivityIndicator size="small" />
+              </View>
+            ) : null
+          }
+        />
+      </View>
+      <TransactionDialog open={depositOpen} onOpenChange={setDepositOpen} type="deposit" />
+      <TransactionDialog open={withdrawOpen} onOpenChange={setWithdrawOpen} type="withdrawal" />
+    </>
   );
 }
