@@ -174,13 +174,11 @@ export default function SignInScreen() {
 
         {/* Submit Button */}
         <View className="gap-4">
-          <Button
-            onPress={() => form.handleSubmit()}
-            loading={isPending}
-            disabled={isPending}
-            icon={<Lock size={20} className="text-primary-foreground" />}
-          >
-            Iniciar sesión
+          <Button onPress={() => form.handleSubmit()} disabled={isPending}>
+            <Lock size={20} className="text-primary-foreground" />
+            <Text className="text-primary-foreground">
+              {isPending ? 'Iniciando sesión...' : 'Iniciar sesión'}
+            </Text>
           </Button>
 
           {/* Divider */}

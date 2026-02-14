@@ -250,12 +250,8 @@ export default function SignUpScreen() {
         </View>
 
         {/* Submit Button */}
-        <Button
-          onPress={() => form.handleSubmit()}
-          loading={isPending}
-          disabled={isPending || !!successMessage}
-        >
-          Crear cuenta
+        <Button onPress={() => form.handleSubmit()} disabled={isPending || !!successMessage}>
+          <Text>{isPending ? 'Creando cuenta...' : 'Crear cuenta'}</Text>
         </Button>
 
         {/* Footer */}

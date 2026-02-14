@@ -32,7 +32,6 @@ export default function AuditLogsScreen() {
       <FlashList
         data={logs}
         renderItem={({ item }) => <AuditLogCard log={item} />}
-        estimatedItemSize={150}
         contentContainerStyle={{ padding: 16 }}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#fff" />
