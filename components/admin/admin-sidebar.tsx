@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, Pressable, Text, TouchableOpacity, View } from 'react-native';
 
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Text as UIText } from '@/components/ui/text';
+import { useSignOut } from '@/hooks/mutations/use-auth-mutations';
 import { useAuth } from '@/hooks/use-auth';
 import { useDevice } from '@/hooks/use-device';
 import { useDismiss } from '@/hooks/use-dismiss';
@@ -69,7 +70,8 @@ export function AdminSidebar({ visible, onClose }: AdminSidebarProps) {
   const { themeMode, setThemeMode } = useAppStore();
   const { isPhone, isDesktop } = useDevice();
   const prefersReducedMotion = usePrefersReducedMotion();
-  const [showExitDialog, setShowExitDialog] = useState(false);
+  const { mutate: signOut, isPending: isSigningOut } = useSignOut();
+  const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const slideAnim = useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
   const isAnimating = useRef(false);
@@ -128,19 +130,27 @@ export function AdminSidebar({ visible, onClose }: AdminSidebarProps) {
     }
   }, [visible, slideAnim, backdropAnim, prefersReducedMotion]);
 
+  const pathname = usePathname();
+
   const handleMenuPress = useCallback(
     (path: string) => {
       onClose();
+      // Don't navigate if we're already on the target route
+      if (pathname === path || pathname === path.replace('/(admin)', '')) return;
       router.push(path as any);
     },
-    [onClose, router],
+    [onClose, router, pathname],
   );
 
-  const handleExitAdmin = useCallback(() => {
-    setShowExitDialog(false);
+  const executeSignOut = useCallback(() => {
+    setShowSignOutDialog(false);
     onClose();
-    router.replace('/(tabs)');
-  }, [onClose, router]);
+    signOut(undefined, {
+      onSuccess: () => {
+        router.replace('/(auth)/sign-in');
+      },
+    });
+  }, [onClose, router, signOut]);
 
   useDismiss({
     visible,
@@ -212,17 +222,30 @@ export function AdminSidebar({ visible, onClose }: AdminSidebarProps) {
               Navegación
             </Text>
             <View className="gap-2">
-              {MENU_ITEMS.map((item) => (
-                <TouchableOpacity
-                  key={item.path}
-                  onPress={() => handleMenuPress(item.path)}
-                  activeOpacity={0.7}
-                  className="flex-row items-center gap-3 rounded-lg px-4 py-3 active:bg-muted"
-                >
-                  <IconSymbol name={item.icon as any} size={20} color="#9BA1A6" />
-                  <UIText className="text-base text-foreground">{item.label}</UIText>
-                </TouchableOpacity>
-              ))}
+              {MENU_ITEMS.map((item) => {
+                const active =
+                  pathname === item.path || pathname === item.path.replace('/(admin)', '');
+                return (
+                  <TouchableOpacity
+                    key={item.path}
+                    onPress={() => handleMenuPress(item.path)}
+                    activeOpacity={active ? 1 : 0.7}
+                    disabled={active}
+                    className={`flex-row items-center gap-3 rounded-lg px-4 py-3 ${active ? 'bg-primary/10' : 'active:bg-muted'}`}
+                  >
+                    <IconSymbol
+                      name={item.icon as any}
+                      size={20}
+                      color={active ? '#3b82f6' : '#9BA1A6'}
+                    />
+                    <UIText
+                      className={`text-base ${active ? 'font-semibold text-primary' : 'text-foreground'}`}
+                    >
+                      {item.label}
+                    </UIText>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
 
@@ -260,35 +283,38 @@ export function AdminSidebar({ visible, onClose }: AdminSidebarProps) {
           {/* Spacer */}
           <View className="flex-1" />
 
-          {/* Exit admin button */}
+          {/* Sign out button */}
           <View className={`border-t border-border px-5 ${isPhone ? 'py-8' : 'py-4'}`}>
             <TouchableOpacity
-              onPress={() => setShowExitDialog(true)}
+              onPress={() => setShowSignOutDialog(true)}
               activeOpacity={0.7}
+              disabled={isSigningOut}
               className="flex-row items-center gap-3 rounded-lg bg-destructive/10 px-4 py-3"
             >
-              <IconSymbol name="arrow.left" size={20} color="#ef4444" />
-              <UIText className="text-base font-semibold text-destructive">Volver a la app</UIText>
+              <IconSymbol name="rectangle.portrait.and.arrow.right" size={20} color="#ef4444" />
+              <UIText className="text-base font-semibold text-destructive">
+                {isSigningOut ? 'Cerrando sesión...' : 'Cerrar sesión'}
+              </UIText>
             </TouchableOpacity>
           </View>
         </View>
       </Animated.View>
 
-      {/* Exit confirmation dialog */}
-      <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+      {/* Sign out confirmation dialog */}
+      <AlertDialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Salir del panel de administración</AlertDialogTitle>
+            <AlertDialogTitle>Cerrar sesión</AlertDialogTitle>
             <AlertDialogDescription>
-              ¿Estás seguro de que quieres volver a la aplicación principal?
+              ¿Estás seguro de que quieres cerrar sesión?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>
+            <AlertDialogCancel disabled={isSigningOut}>
               <UIText>Cancelar</UIText>
             </AlertDialogCancel>
-            <AlertDialogAction onPress={handleExitAdmin}>
-              <UIText>Salir</UIText>
+            <AlertDialogAction onPress={executeSignOut} disabled={isSigningOut}>
+              <UIText>{isSigningOut ? 'Cerrando...' : 'Cerrar sesión'}</UIText>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
