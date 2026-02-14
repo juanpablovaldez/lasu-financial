@@ -3,6 +3,31 @@
 @tailwind utilities;
 
 @layer base {
+  /* Touch and mobile optimizations */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:active,
+  a:active,
+  [role='button']:active {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .dark button:active,
+  .dark a:active,
+  .dark [role='button']:active {
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  .overscroll-contain {
+    overscroll-behavior: contain;
+  }
+
   :root {
     /* Neutral base colors */
     --background: 0 0% 100%;

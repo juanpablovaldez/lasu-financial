@@ -1,3 +1,4 @@
+import * as React from 'react';
 import type { TextInput as RNTextInput } from 'react-native';
 import { View } from 'react-native';
 
@@ -25,10 +26,14 @@ export interface TextInputProps extends React.ComponentProps<typeof RNTextInput>
  * - Optional icons (left and right)
  * - Error state with border and message (semantic destructive colors)
  * - Full accessibility support
+ * - Ref forwarding for focus management
  *
  * @example
  * ```tsx
+ * const inputRef = useRef<RNTextInput>(null);
+ *
  * <TextInput
+ *   ref={inputRef}
  *   label="EMAIL ADDRESS"
  *   value={email}
  *   onChangeText={setEmail}
@@ -39,41 +44,39 @@ export interface TextInputProps extends React.ComponentProps<typeof RNTextInput>
  * />
  * ```
  */
-export function TextInput({
-  label,
-  error,
-  leftIcon,
-  rightIcon,
-  className,
-  ...props
-}: TextInputProps) {
-  return (
-    <View className="gap-2">
-      {label && (
-        <Label className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          {label}
-        </Label>
-      )}
-
-      <View
-        className={cn(
-          'flex-row items-center gap-3 rounded-xl bg-input px-4 py-3.5',
-          error && 'border border-destructive',
+export const TextInput = React.forwardRef<RNTextInput, TextInputProps>(
+  ({ label, error, leftIcon, rightIcon, className, ...props }, ref) => {
+    return (
+      <View className="gap-2">
+        {label && (
+          <Label className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+            {label}
+          </Label>
         )}
-      >
-        {leftIcon}
 
-        <Input
-          className={cn('flex-1 border-0 bg-transparent p-0 shadow-none', className)}
-          placeholderClassName="text-muted-foreground"
-          aria-invalid={!!error}
-          {...props}
-        />
+        <View
+          className={cn(
+            'flex-row items-center gap-3 rounded-xl bg-input px-4 py-3.5',
+            error && 'border border-destructive',
+          )}
+        >
+          {leftIcon}
 
-        {rightIcon}
+          <Input
+            ref={ref}
+            className={cn('flex-1 border-0 bg-transparent p-0 shadow-none', className)}
+            placeholderClassName="text-muted-foreground"
+            aria-invalid={!!error}
+            {...props}
+          />
+
+          {rightIcon}
+        </View>
+
+        {error && <Text className="text-sm text-destructive">{error}</Text>}
       </View>
+    );
+  },
+);
 
-      {error && <Text className="text-sm text-destructive">{error}</Text>}
-    </View>
-  );
-}
+TextInput.displayName = 'TextInput';

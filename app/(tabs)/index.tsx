@@ -28,8 +28,16 @@ export default function HomeScreen() {
 
   const renderItem = ({ item }: { item: Instrument }) => (
     <View className="border-b border-border px-4 py-4">
-      <Text className="text-base text-foreground">{item.name}</Text>
-      {item.symbol && <Text className="mt-0.5 text-sm text-muted-foreground">{item.symbol}</Text>}
+      <View className="min-w-0 flex-1">
+        <Text className="text-base font-medium text-foreground" numberOfLines={1}>
+          {item.name}
+        </Text>
+        {item.symbol && (
+          <Text className="mt-0.5 text-sm text-muted-foreground" numberOfLines={1}>
+            {item.symbol}
+          </Text>
+        )}
+      </View>
     </View>
   );
 

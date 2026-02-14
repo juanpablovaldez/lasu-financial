@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef } from 'react';
-import { Animated, Dimensions, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Dimensions, Pressable, Text, TouchableOpacity, View } from 'react-native';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/hooks/use-auth';
@@ -9,7 +9,8 @@ import { useAppStore } from '@/stores/app-store';
 
 import { useDevice } from '@/hooks/use-device';
 import { useDismiss } from '@/hooks/use-dismiss';
-import { formatDate } from 'date-fns';
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
+import { formatDate } from '@/utils/format-date';
 
 const SIDEBAR_WIDTH = Dimensions.get('window').width * 0.78;
 const SIDEBAR_HEIGHT = Dimensions.get('window').height * 1;
@@ -23,7 +24,8 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
   const router = useRouter();
   const { session } = useAuth();
   const { themeMode, setThemeMode } = useAppStore();
-  const { isPhone } = useDevice();
+  const { isPhone, isDesktop } = useDevice();
+  const prefersReducedMotion = usePrefersReducedMotion();
   const slideAnim = useRef(new Animated.Value(-SIDEBAR_WIDTH)).current;
   const backdropAnim = useRef(new Animated.Value(0)).current;
   const isAnimating = useRef(false);
@@ -31,21 +33,26 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
 
   const email = session?.user?.email;
   const displayName = session?.user?.user_metadata?.full_name ?? email?.split('@')[0] ?? 'User';
-  const lastSignIn = formatDate(new Date(session?.user?.last_sign_in_at ?? ''), 'dd/MM/yyyy HH:mm');
+  const lastSignIn = session?.user?.last_sign_in_at
+    ? formatDate(session.user.last_sign_in_at, 'es-MX')
+    : 'Desconocido';
 
   useEffect(() => {
+    const openDuration = prefersReducedMotion ? 0 : 280;
+    const closeDuration = prefersReducedMotion ? 0 : 220;
+
     if (visible) {
       isVisible.current = true;
       isAnimating.current = true;
       Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: 0,
-          duration: 280,
+          duration: openDuration,
           useNativeDriver: true,
         }),
         Animated.timing(backdropAnim, {
           toValue: 1,
-          duration: 280,
+          duration: openDuration,
           useNativeDriver: true,
         }),
       ]).start(() => {
@@ -56,12 +63,12 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
       Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: -SIDEBAR_WIDTH,
-          duration: 220,
+          duration: closeDuration,
           useNativeDriver: true,
         }),
         Animated.timing(backdropAnim, {
           toValue: 0,
-          duration: 220,
+          duration: closeDuration,
           useNativeDriver: true,
         }),
       ]).start(() => {
@@ -69,11 +76,28 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
         isVisible.current = false;
       });
     }
-  }, [visible, slideAnim, backdropAnim]);
-  const handleSignOut = useCallback(async () => {
-    onClose();
-    await supabase.auth.signOut();
-    router.replace('/(auth)/sign-in');
+  }, [visible, slideAnim, backdropAnim, prefersReducedMotion]);
+  const handleSignOut = useCallback(() => {
+    Alert.alert(
+      'Cerrar sesión',
+      '¿Estás seguro de que quieres cerrar sesión?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Cerrar sesión',
+          style: 'destructive',
+          onPress: async () => {
+            onClose();
+            await supabase.auth.signOut();
+            router.replace('/(auth)/sign-in');
+          },
+        },
+      ],
+      { cancelable: true },
+    );
   }, [onClose, router]);
 
   const themeModes = [
@@ -101,12 +125,16 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
       <Animated.View
         style={{
           transform: [{ translateX: slideAnim }],
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: 0,
           width: SIDEBAR_WIDTH,
           height: SIDEBAR_HEIGHT,
+          ...(isDesktop && { overscrollBehavior: 'contain' }),
         }}
-        className="absolute bottom-0 left-0 top-0 bg-background shadow-2xl"
       >
-        <View className="flex-1 pt-16">
+        <View className="flex-1 bg-background pt-16 shadow-2xl">
           {/* User header */}
           <View className="border-b border-border px-5 pb-5">
             <View className="flex-row items-center gap-3">
@@ -115,11 +143,20 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
                   {email?.charAt(0).toUpperCase()}
                 </Text>
               </View>
-              <View className="flex-1">
-                <Text className="text-lg font-bold text-foreground">{displayName}</Text>
-                <Text className="text-sm text-muted-foreground">{email}</Text>
+              <View className="min-w-0 flex-1">
+                <Text className="text-lg font-bold text-foreground" numberOfLines={1}>
+                  {displayName}
+                </Text>
+                <Text className="text-sm text-muted-foreground" numberOfLines={1}>
+                  {email}
+                </Text>
               </View>
-              <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
+              <TouchableOpacity
+                onPress={onClose}
+                activeOpacity={0.7}
+                accessibilityLabel="Cerrar menú lateral"
+                accessibilityRole="button"
+              >
                 <IconSymbol name="xmark" size={22} color="#9BA1A6" />
               </TouchableOpacity>
             </View>

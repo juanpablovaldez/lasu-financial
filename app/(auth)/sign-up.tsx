@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { z } from 'zod';
 
+import { Announcement } from '@/components/ui/announcement';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/text-input';
 import { useSignUp } from '@/hooks/mutations/use-auth-mutations';
@@ -71,7 +72,9 @@ export default function SignUpScreen() {
       >
         {/* Header */}
         <View className="gap-2">
-          <Text className="text-3xl font-bold text-foreground">Crear cuenta</Text>
+          <Text variant="h1" className="text-left text-3xl font-bold text-foreground">
+            Crear cuenta
+          </Text>
           <Text className="text-base text-muted-foreground">Únete a miles de inversores</Text>
         </View>
 
@@ -94,6 +97,10 @@ export default function SignUpScreen() {
           </View>
         )}
 
+        {/* Screen reader announcements */}
+        <Announcement message={successMessage} politeness="polite" />
+        <Announcement message={error?.message} politeness="assertive" />
+
         {/* Form */}
         <View className="gap-4">
           {/* Full Name Field (Optional) */}
@@ -101,7 +108,7 @@ export default function SignUpScreen() {
             {(field) => (
               <TextInput
                 label="Nombre completo"
-                placeholder="John Doe"
+                placeholder="Juan Pérez…"
                 value={field.state.value}
                 onChangeText={field.handleChange}
                 onBlur={field.handleBlur}
@@ -127,7 +134,7 @@ export default function SignUpScreen() {
             {(field) => (
               <TextInput
                 label="Correo electrónico"
-                placeholder="nombre@ejemplo.com"
+                placeholder="nombre@ejemplo.com…"
                 value={field.state.value}
                 onChangeText={field.handleChange}
                 onBlur={field.handleBlur}
@@ -152,27 +159,42 @@ export default function SignUpScreen() {
             }}
           >
             {(field) => (
-              <TextInput
-                label="Contraseña"
-                placeholder="Al menos 8 caracteres"
-                value={field.state.value}
-                onChangeText={field.handleChange}
-                onBlur={field.handleBlur}
-                error={field.state.meta.errors[0] as string | undefined}
-                leftIcon={<Lock size={20} className="text-muted-foreground" />}
-                rightIcon={
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    {showPassword ? (
-                      <Eye size={20} className="text-muted-foreground" />
-                    ) : (
-                      <EyeOff size={20} className="text-muted-foreground" />
-                    )}
-                  </TouchableOpacity>
-                }
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                autoComplete="password-new"
-              />
+              <View>
+                <TextInput
+                  label="Contraseña"
+                  placeholder="Al menos 8 caracteres"
+                  value={field.state.value}
+                  onChangeText={field.handleChange}
+                  onBlur={field.handleBlur}
+                  error={field.state.meta.errors[0] as string | undefined}
+                  leftIcon={<Lock size={20} className="text-muted-foreground" />}
+                  rightIcon={
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(!showPassword)}
+                      accessibilityLabel={
+                        showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                      }
+                      accessibilityRole="button"
+                    >
+                      {showPassword ? (
+                        <Eye size={20} className="text-muted-foreground" />
+                      ) : (
+                        <EyeOff size={20} className="text-muted-foreground" />
+                      )}
+                    </TouchableOpacity>
+                  }
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoComplete="password-new"
+                  accessibilityDescribedBy="password-requirements"
+                />
+                <Text
+                  nativeID="password-requirements"
+                  className="mt-1.5 text-xs text-muted-foreground"
+                >
+                  Mínimo 8 caracteres, incluye mayúsculas, minúsculas y números
+                </Text>
+              </View>
             )}
           </form.Field>
 
@@ -209,7 +231,15 @@ export default function SignUpScreen() {
                 error={field.state.meta.errors[0] as string | undefined}
                 leftIcon={<Lock size={20} className="text-muted-foreground" />}
                 rightIcon={
-                  <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                  <TouchableOpacity
+                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                    accessibilityLabel={
+                      showConfirmPassword
+                        ? 'Ocultar confirmación de contraseña'
+                        : 'Mostrar confirmación de contraseña'
+                    }
+                    accessibilityRole="button"
+                  >
                     {showConfirmPassword ? (
                       <Eye size={20} className="text-muted-foreground" />
                     ) : (

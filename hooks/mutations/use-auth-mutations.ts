@@ -19,27 +19,31 @@ function mapAuthError(error: AuthError | Error): string {
   const message = error.message.toLowerCase();
 
   if (message.includes('invalid login credentials')) {
-    return 'Credenciales inválidas. Por favor, verifica tu correo electrónico y contraseña';
+    return 'Credenciales inválidas. Verifica tu correo y contraseña, o usa "¿Olvidaste tu contraseña?" para restablecerla.';
   }
 
   if (message.includes('email not confirmed')) {
-    return 'Por favor, verifica tu correo electrónico antes de iniciar sesión';
+    return 'Debes verificar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada y carpeta de spam para encontrar el enlace de confirmación.';
   }
 
   if (message.includes('user already registered')) {
-    return 'Ya existe una cuenta con este correo electrónico';
+    return 'Ya existe una cuenta con este correo electrónico. Intenta iniciar sesión o usa "¿Olvidaste tu contraseña?" si no recuerdas tus credenciales.';
   }
 
   if (message.includes('password should be at least')) {
-    return 'La contraseña es demasiado débil. Por favor, usa al menos 8 caracteres';
+    return 'La contraseña es demasiado débil. Usa al menos 8 caracteres, incluyendo mayúsculas, minúsculas y números.';
   }
 
   if (message.includes('invalid email')) {
-    return 'Por favor, ingresa una dirección de correo electrónico válida';
+    return 'El formato del correo electrónico no es válido. Asegúrate de usar un formato como nombre@ejemplo.com';
   }
 
   if (message.includes('network')) {
-    return 'Error de red. Por favor, verifica tu conexión e inténtalo de nuevo';
+    return 'Error de conexión. Verifica que estés conectado a internet e intenta nuevamente. Si el problema persiste, contacta con soporte.';
+  }
+
+  if (message.includes('rate limit')) {
+    return 'Demasiados intentos. Por razones de seguridad, espera unos minutos antes de volver a intentarlo.';
   }
 
   return error.message;

@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { z } from 'zod';
 
+import { Announcement } from '@/components/ui/announcement';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/text-input';
 import { supabase } from '@/lib/supabase';
@@ -73,9 +74,11 @@ export default function ForgotPasswordScreen() {
       >
         {/* Header */}
         <View className="gap-2">
-          <Text className="text-3xl font-bold text-foreground">Reset Password</Text>
+          <Text variant="h1" className="text-left text-3xl font-bold text-foreground">
+            Restablecer contraseña
+          </Text>
           <Text className="text-base text-muted-foreground">
-            We&apos;ll send you a reset link to your email
+            Te enviaremos un enlace de restablecimiento a tu correo
           </Text>
         </View>
 
@@ -100,6 +103,10 @@ export default function ForgotPasswordScreen() {
           </View>
         )}
 
+        {/* Screen reader announcements */}
+        <Announcement message={successMessage} politeness="polite" />
+        <Announcement message={error} politeness="assertive" />
+
         {/* Form */}
         <View className="gap-4">
           {/* Email Field */}
@@ -116,7 +123,7 @@ export default function ForgotPasswordScreen() {
             {(field) => (
               <TextInput
                 label="Correo electrónico"
-                placeholder="name@example.com"
+                placeholder="nombre@ejemplo.com…"
                 value={field.state.value}
                 onChangeText={field.handleChange}
                 onBlur={field.handleBlur}

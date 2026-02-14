@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 
+import { Announcement } from '@/components/ui/announcement';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/text-input';
 import { useSignIn } from '@/hooks/mutations/use-auth-mutations';
@@ -50,7 +51,9 @@ export default function SignInScreen() {
       >
         {/* Header */}
         <View className="gap-2">
-          <Text className="text-3xl font-bold text-foreground">Bienvenido de nuevo</Text>
+          <Text variant="h1" className="text-left text-3xl font-bold text-foreground">
+            Bienvenido de nuevo
+          </Text>
           <Text className="text-base text-muted-foreground">
             Accede a tu portafolio de forma segura
           </Text>
@@ -62,6 +65,9 @@ export default function SignInScreen() {
             <Text className="text-sm text-destructive">{error.message}</Text>
           </View>
         )}
+
+        {/* Screen reader announcement for errors */}
+        <Announcement message={error?.message} politeness="assertive" />
 
         {/* Form */}
         <View className="gap-4">
@@ -79,7 +85,7 @@ export default function SignInScreen() {
             {(field) => (
               <TextInput
                 label="Correo electrónico"
-                placeholder="nombre@ejemplo.com"
+                placeholder="nombre@ejemplo.com…"
                 value={field.state.value}
                 onChangeText={field.handleChange}
                 onBlur={field.handleBlur}
@@ -127,7 +133,13 @@ export default function SignInScreen() {
                   error={field.state.meta.errors[0] as string | undefined}
                   leftIcon={<Lock size={20} className="text-muted-foreground" />}
                   rightIcon={
-                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(!showPassword)}
+                      accessibilityLabel={
+                        showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                      }
+                      accessibilityRole="button"
+                    >
                       {showPassword ? (
                         <Eye size={20} className="text-muted-foreground" />
                       ) : (
