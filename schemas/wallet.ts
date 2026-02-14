@@ -24,6 +24,13 @@ export const transactionSchema = z.object({
   created_at: z.string(),
   completed_at: z.string().nullish(),
   metadata: z.record(z.unknown()).nullish(),
+  // Admin approval fields
+  approved_by: z.string().uuid().nullish(),
+  approved_at: z.string().nullish(),
+  rejected_by: z.string().uuid().nullish(),
+  rejected_at: z.string().nullish(),
+  rejection_reason: z.string().nullish(),
+  admin_notes: z.string().nullish(),
 });
 
 export type Transaction = z.infer<typeof transactionSchema>;
