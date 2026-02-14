@@ -83,3 +83,6 @@ android/
 *.mobileprovision
 
 app-example
+
+supabase/.temp
+.mcp.json
