@@ -16,3 +16,6 @@
  * ```
  */
 export { useCreateTransaction } from './use-wallet-mutations';
+export { useTransactionApproval } from './use-transaction-approval';
+export { useCreateOperation } from './use-create-operation';
+export { useCompleteOperation } from './use-complete-operation';
