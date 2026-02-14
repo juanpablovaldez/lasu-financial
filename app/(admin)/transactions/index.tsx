@@ -39,7 +39,6 @@ export default function PendingTransactionsScreen() {
             onPress={() => router.push(`/(admin)/transactions/${item.id}` as any)}
           />
         )}
-        estimatedItemSize={150}
         contentContainerStyle={{ padding: 16 }}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#fff" />

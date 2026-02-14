@@ -2,18 +2,12 @@ import { useForm } from '@tanstack/react-form';
 import { Link } from 'expo-router';
 import { Mail } from 'lucide-react-native';
 import { useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, View } from 'react-native';
 import { z } from 'zod';
 
 import { Announcement } from '@/components/ui/announcement';
 import { Button } from '@/components/ui/button';
+import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
 import { supabase } from '@/lib/supabase';
 
@@ -74,7 +68,7 @@ export default function ForgotPasswordScreen() {
       >
         {/* Header */}
         <View className="gap-2">
-          <Text variant="h1" className="text-left text-3xl font-bold text-foreground">
+          <Text className="text-left text-3xl font-bold text-foreground">
             Restablecer contraseña
           </Text>
           <Text className="text-base text-muted-foreground">
@@ -140,12 +134,8 @@ export default function ForgotPasswordScreen() {
         </View>
 
         {/* Submit Button */}
-        <Button
-          onPress={() => form.handleSubmit()}
-          loading={isLoading}
-          disabled={isLoading || !!successMessage}
-        >
-          Enviar enlace de restablecimiento
+        <Button onPress={() => form.handleSubmit()} disabled={isLoading || !!successMessage}>
+          <Text>{isLoading ? 'Enviando...' : 'Enviar enlace de restablecimiento'}</Text>
         </Button>
 
         {/* Footer */}

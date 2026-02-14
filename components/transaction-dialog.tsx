@@ -1,5 +1,4 @@
 import { useForm } from '@tanstack/react-form';
-import { zodValidator } from '@tanstack/zod-form-adapter';
 import { useState } from 'react';
 import { View } from 'react-native';
 
@@ -36,7 +35,6 @@ export function TransactionDialog({ open, onOpenChange, type }: TransactionDialo
       amount: '',
       description: '',
     },
-    validatorAdapter: zodValidator(),
     onSubmit: async ({ value }) => {
       const amount = parseFloat(value.amount);
 
