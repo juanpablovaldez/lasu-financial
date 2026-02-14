@@ -1,7 +1,8 @@
-import { TextClassContext } from '@/components/ui/text';
+import { Text, TextClassContext } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { Platform, Pressable } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Platform, Pressable, View } from 'react-native';
 
 const buttonVariants = cva(
   cn(
@@ -88,18 +89,82 @@ const buttonTextVariants = cva(
   },
 );
 
-type ButtonProps = React.ComponentProps<typeof Pressable> &
+type ButtonProps = Omit<React.ComponentProps<typeof Pressable>, 'children'> &
   React.RefAttributes<typeof Pressable> &
-  VariantProps<typeof buttonVariants>;
+  VariantProps<typeof buttonVariants> & {
+    /**
+     * Optional icon to display before the button text
+     */
+    icon?: React.ReactNode;
 
-function Button({ className, variant, size, ...props }: ButtonProps) {
+    /**
+     * Whether the button is in a loading state
+     */
+    loading?: boolean;
+
+    /**
+     * The button text or content
+     */
+    children?: React.ReactNode;
+  };
+
+function Button({
+  className,
+  variant,
+  size,
+  icon,
+  loading = false,
+  disabled,
+  onPress,
+  children,
+  ...props
+}: ButtonProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isDisabled = disabled || loading || isSubmitting;
+
+  const handlePress = async (event: any) => {
+    if (isDisabled || !onPress) return;
+
+    // Prevent double-submit
+    setIsSubmitting(true);
+    try {
+      // Handle both sync and async onPress by wrapping in Promise.resolve
+      await Promise.resolve(onPress(event));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <TextClassContext.Provider value={buttonTextVariants({ variant, size })}>
       <Pressable
-        className={cn(props.disabled && 'opacity-50', buttonVariants({ variant, size }), className)}
+        className={cn(
+          isDisabled && 'opacity-50',
+          buttonVariants({ variant, size }),
+          className,
+          Platform.OS === 'web' && 'touch-manipulation',
+        )}
         role="button"
+        disabled={isDisabled}
+        onPress={handlePress}
         {...props}
-      />
+      >
+        {loading ? (
+          <View className="flex-row items-center gap-2">
+            <ActivityIndicator
+              size="small"
+              color={variant === 'default' || variant === 'destructive' ? '#ffffff' : undefined}
+            />
+            <Text>{children}</Text>
+          </View>
+        ) : (
+          <View className="flex-row items-center gap-2">
+            {icon}
+            <Text>{children}</Text>
+          </View>
+        )}
+      </Pressable>
     </TextClassContext.Provider>
   );
 }

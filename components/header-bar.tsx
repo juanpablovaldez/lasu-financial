@@ -67,6 +67,11 @@ export function HeaderBar({ onAvatarPress }: HeaderBarProps) {
         onPress={toggleTheme}
         activeOpacity={0.7}
         className="h-11 w-11 items-center justify-center rounded-full bg-muted"
+        accessibilityLabel={
+          colorScheme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'
+        }
+        accessibilityRole="button"
+        accessibilityHint="Alterna entre el tema claro y oscuro"
       >
         <IconSymbol
           name={colorScheme === 'dark' ? 'sun.max.fill' : 'moon.fill'}
