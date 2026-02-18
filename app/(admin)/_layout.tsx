@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
@@ -20,13 +20,8 @@ export default function AdminLayout() {
     );
   }
 
-  // If not authorized, guard hook will redirect
   if (!isAuthorized) {
-    return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <Text className="text-destructive">Acceso denegado</Text>
-      </View>
-    );
+    return <Redirect href="/(tabs)" />;
   }
 
   return (
