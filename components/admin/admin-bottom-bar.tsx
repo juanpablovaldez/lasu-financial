@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Text } from '@/components/ui/text';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useDevice } from '@/hooks/use-device';
 
 interface BottomBarItem {
@@ -40,6 +41,7 @@ export function AdminBottomBar() {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const { isDesktop } = useDevice();
+  const colorScheme = useColorScheme();
 
   const handlePress = (path: string) => {
     if (pathname === path || pathname === path.replace('/(admin)', '')) return;
@@ -79,7 +81,7 @@ export function AdminBottomBar() {
               <IconSymbol
                 name={item.icon as any}
                 size={22}
-                color={active ? '#3b82f6' : '#9BA1A6'}
+                color={active ? (colorScheme === 'dark' ? '#ffffff' : '#000000') : '#9BA1A6'}
               />
               <Text
                 className={`text-xs font-medium ${active ? 'text-primary' : 'text-muted-foreground'}`}

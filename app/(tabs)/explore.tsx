@@ -10,10 +10,10 @@ import { TransactionList } from '@/components/transaction-list';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Colors } from '@/constants/colors';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { balanceKeys } from '@/hooks/queries/use-balance';
-import { transactionKeys } from '@/hooks/queries/use-transactions';
 import { exchangeRateKeys } from '@/hooks/queries/use-exchange-rate';
+import { transactionKeys } from '@/hooks/queries/use-transactions';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export default function WalletScreen() {
   const [depositOpen, setDepositOpen] = useState(false);
@@ -48,7 +48,7 @@ export default function WalletScreen() {
           {/* Action Buttons */}
           <View className="flex-row gap-3">
             <Button className="flex-1 flex-row gap-2" onPress={() => setDepositOpen(true)}>
-              <ArrowDownToLine size={16} color="white" />
+              <ArrowDownToLine size={16} color={iconColor} />
               <Text>Solicitar depósito</Text>
             </Button>
             <Button
