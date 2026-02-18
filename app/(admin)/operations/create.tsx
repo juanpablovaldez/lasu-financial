@@ -1,8 +1,10 @@
 import { useRouter } from 'expo-router';
+import { CircleAlert } from 'lucide-react-native';
 import { useState } from 'react';
-import { Alert, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { UserPickerField } from '@/components/admin/user-picker-field';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
@@ -25,6 +27,9 @@ const CURRENCIES = [
 export default function CreateOperationScreen() {
   const router = useRouter();
   const { mutate: createOperation, isPending } = useCreateOperation();
+  const [alertMessage, setAlertMessage] = useState<{ title: string; description: string } | null>(
+    null,
+  );
 
   const [selectedUserId, setSelectedUserId] = useState('');
   const [operationType, setOperationType] = useState<string>('buy');
@@ -57,17 +62,20 @@ export default function CreateOperationScreen() {
 
     if (!result.success) {
       const firstError = result.error.errors[0];
-      Alert.alert('Error de validación', firstError?.message || 'Datos inválidos');
+      setAlertMessage({
+        title: 'Error de validación',
+        description: firstError?.message || 'Datos inválidos',
+      });
       return;
     }
 
+    setAlertMessage(null);
     createOperation(result.data, {
       onSuccess: () => {
-        Alert.alert('Éxito', 'Operación creada correctamente');
         router.back();
       },
       onError: (error) => {
-        Alert.alert('Error', error.message);
+        setAlertMessage({ title: 'Error', description: error.message });
       },
     });
   };
@@ -180,6 +188,13 @@ export default function CreateOperationScreen() {
               />
             </View>
           </>
+        )}
+
+        {alertMessage && (
+          <Alert icon={CircleAlert} variant="destructive">
+            <AlertTitle>{alertMessage.title}</AlertTitle>
+            <AlertDescription>{alertMessage.description}</AlertDescription>
+          </Alert>
         )}
 
         {/* Submit */}

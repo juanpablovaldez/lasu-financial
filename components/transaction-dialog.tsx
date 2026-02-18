@@ -25,7 +25,7 @@ type TransactionDialogProps = {
 
 export function TransactionDialog({ open, onOpenChange, type }: TransactionDialogProps) {
   const preferredCurrency = useWalletStore((state) => state.preferredCurrency);
-  const { mutate, isPending, error, isSuccess } = useCreateTransaction();
+  const { mutate, isPending, error } = useCreateTransaction();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const form = useForm({
