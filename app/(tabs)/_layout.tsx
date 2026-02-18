@@ -1,5 +1,5 @@
-import { Tabs, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { Redirect, Tabs } from 'expo-router';
+import React, { useState } from 'react';
 import { ActivityIndicator, Platform, View } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
@@ -14,18 +14,11 @@ import { useUserGuard } from '@/hooks/use-user-guard';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const router = useRouter();
   const { session, isLoading, isInitialized } = useAuth();
-  const { isAuthorized: isRegularUser } = useUserGuard();
+  const { isAuthorized: isRegularUser, isLoading: isRoleLoading } = useUserGuard();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    if (isInitialized && !isLoading && !session) {
-      router.replace('/(auth)/sign-in');
-    }
-  }, [session, isLoading, isInitialized, router]);
-
-  if (!isInitialized || isLoading) {
+  if (!isInitialized || isLoading || isRoleLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-surface-dark">
         <ActivityIndicator size="large" color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
@@ -33,8 +26,12 @@ export default function TabLayout() {
     );
   }
 
-  if (!session || !isRegularUser) {
-    return null;
+  if (!session) {
+    return <Redirect href="/(auth)/sign-in" />;
+  }
+
+  if (!isRegularUser) {
+    return <Redirect href="/(admin)" />;
   }
 
   return (
