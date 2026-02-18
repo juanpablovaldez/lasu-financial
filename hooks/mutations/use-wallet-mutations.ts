@@ -41,18 +41,7 @@ async function createTransaction(
     throw new Error(`Transaction failed: ${error.message}`);
   }
 
-  const { data: completedData, error: updateError } = await supabase
-    .from('transactions')
-    .update({ status: 'completed' })
-    .eq('id', data.id)
-    .select()
-    .single();
-
-  if (updateError) {
-    throw new Error(`Failed to complete transaction: ${updateError.message}`);
-  }
-
-  return transactionSchema.parse(completedData);
+  return transactionSchema.parse(data);
 }
 
 /**
