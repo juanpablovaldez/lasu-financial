@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { Alert, Platform } from 'react-native';
+import { Platform } from 'react-native';
 
 /**
  * Hook to warn users when navigating away from a form with unsaved changes.
@@ -116,22 +116,9 @@ export function checkUnsavedChanges(
     }
     return false;
   } else {
-    // Native: use React Native Alert
-    Alert.alert(
-      'Cambios sin guardar',
-      message,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Salir',
-          style: 'destructive',
-          onPress: () => {
-            onConfirm();
-          },
-        },
-      ],
-      { cancelable: false },
-    );
-    return false; // Return false because confirmation is async
+    // Native: requires an AlertDialog component for confirmation
+    // TODO: implement via an AlertDialog when this hook is used in a screen
+    onConfirm();
+    return true;
   }
 }

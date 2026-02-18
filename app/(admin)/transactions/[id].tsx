@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { CircleAlert } from 'lucide-react-native';
 import { useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, View } from 'react-native';
+import { ActivityIndicator, ScrollView, View } from 'react-native';
 
 import {
   AlertDialog,
@@ -12,6 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
@@ -28,6 +30,7 @@ export default function TransactionApprovalScreen() {
 
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleApprove = () => {
     processApproval(
@@ -38,12 +41,11 @@ export default function TransactionApprovalScreen() {
       {
         onSuccess: () => {
           setShowApproveDialog(false);
-          Alert.alert('Éxito', 'Transacción aprobada correctamente');
           router.back();
         },
         onError: (error) => {
           setShowApproveDialog(false);
-          Alert.alert('Error', error.message);
+          setErrorMessage(error.message);
         },
       },
     );
@@ -59,12 +61,11 @@ export default function TransactionApprovalScreen() {
       {
         onSuccess: () => {
           setShowRejectDialog(false);
-          Alert.alert('Éxito', 'Transacción rechazada');
           router.back();
         },
         onError: (error) => {
           setShowRejectDialog(false);
-          Alert.alert('Error', error.message);
+          setErrorMessage(error.message);
         },
       },
     );
@@ -146,6 +147,13 @@ export default function TransactionApprovalScreen() {
             )}
           </CardContent>
         </Card>
+
+        {errorMessage && (
+          <Alert icon={CircleAlert} variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
 
         {/* Action Buttons */}
         {canApprove && (
