@@ -14,12 +14,12 @@ export const NAV_THEME: {
   light: {
     dark: false,
     colors: {
-      primary: 'rgb(59, 130, 246)', // --primary (hsl 217 91% 60%)
+      primary: 'rgb(10, 10, 10)', // --primary (near black)
       background: 'rgb(255, 255, 255)', // --background
       card: 'rgb(255, 255, 255)', // --card
       text: 'rgb(10, 10, 10)', // --foreground
       border: 'rgb(229, 229, 229)', // --border
-      notification: 'rgb(59, 130, 246)', // --primary
+      notification: 'rgb(10, 10, 10)', // --primary
     },
     fonts: {
       regular: {
@@ -43,12 +43,12 @@ export const NAV_THEME: {
   dark: {
     dark: true,
     colors: {
-      primary: 'rgb(59, 130, 246)', // --primary
+      primary: 'rgb(250, 250, 250)', // --primary (near white)
       background: 'rgb(21, 23, 24)', // --background (surface.dark #151718)
       card: 'rgb(21, 23, 24)', // --card
       text: 'rgb(250, 250, 250)', // --foreground
       border: 'rgb(38, 38, 38)', // --border
-      notification: 'rgb(59, 130, 246)', // --primary
+      notification: 'rgb(250, 250, 250)', // --primary
     },
     fonts: {
       regular: {

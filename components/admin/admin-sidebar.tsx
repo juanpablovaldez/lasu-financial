@@ -18,6 +18,7 @@ import { useSignOut } from '@/hooks/mutations/use-auth-mutations';
 import { useAuth } from '@/hooks/use-auth';
 import { useDevice } from '@/hooks/use-device';
 import { useDismiss } from '@/hooks/use-dismiss';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { useAppStore } from '@/stores/app-store';
 import { formatDate } from '@/utils/format-date';
@@ -68,6 +69,7 @@ export function AdminSidebar({ visible, onClose }: AdminSidebarProps) {
   const router = useRouter();
   const { session } = useAuth();
   const { themeMode, setThemeMode } = useAppStore();
+  const colorScheme = useColorScheme();
   const { isPhone, isDesktop } = useDevice();
   const prefersReducedMotion = usePrefersReducedMotion();
   const { mutate: signOut, isPending: isSigningOut } = useSignOut();
@@ -236,7 +238,7 @@ export function AdminSidebar({ visible, onClose }: AdminSidebarProps) {
                     <IconSymbol
                       name={item.icon as any}
                       size={20}
-                      color={active ? '#3b82f6' : '#9BA1A6'}
+                      color={active ? (colorScheme === 'dark' ? '#ffffff' : '#000000') : '#9BA1A6'}
                     />
                     <UIText
                       className={`text-base ${active ? 'font-semibold text-primary' : 'text-foreground'}`}
@@ -266,7 +268,13 @@ export function AdminSidebar({ visible, onClose }: AdminSidebarProps) {
                       isActive ? 'bg-primary/10' : 'bg-muted'
                     }`}
                   >
-                    <IconSymbol name={icon} size={16} color={isActive ? '#3b82f6' : '#9BA1A6'} />
+                    <IconSymbol
+                      name={icon}
+                      size={16}
+                      color={
+                        isActive ? (colorScheme === 'dark' ? '#ffffff' : '#000000') : '#9BA1A6'
+                      }
+                    />
                     <Text
                       className={`text-xs font-medium ${
                         isActive ? 'text-primary' : 'text-muted-foreground'

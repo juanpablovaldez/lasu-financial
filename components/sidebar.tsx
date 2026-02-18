@@ -20,6 +20,7 @@ import { useAppStore } from '@/stores/app-store';
 
 import { useDevice } from '@/hooks/use-device';
 import { useDismiss } from '@/hooks/use-dismiss';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { formatDate } from '@/utils/format-date';
 
@@ -35,6 +36,7 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
   const router = useRouter();
   const { session } = useAuth();
   const { themeMode, setThemeMode } = useAppStore();
+  const colorScheme = useColorScheme();
   const { isPhone, isDesktop } = useDevice();
   const prefersReducedMotion = usePrefersReducedMotion();
   const { mutate: signOut, isPending: isSigningOut } = useSignOut();
@@ -192,7 +194,13 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
                       isActive ? 'bg-primary/10' : 'bg-muted'
                     }`}
                   >
-                    <IconSymbol name={icon} size={16} color={isActive ? '#3b82f6' : '#9BA1A6'} />
+                    <IconSymbol
+                      name={icon}
+                      size={16}
+                      color={
+                        isActive ? (colorScheme === 'dark' ? '#ffffff' : '#000000') : '#9BA1A6'
+                      }
+                    />
                     <Text
                       className={`text-xs font-medium ${
                         isActive ? 'text-primary' : 'text-muted-foreground'
