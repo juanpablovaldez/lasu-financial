@@ -41,8 +41,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
 
-    /* Primary brand color - using existing primary-500 #3b82f6 */
-    --primary: 217 91% 60%;
+    /* Primary brand color - near black */
+    --primary: 0 0% 9%;
     --primary-foreground: 0 0% 98%;
 
     /* Secondary surfaces */
@@ -64,7 +64,7 @@
     /* Borders and inputs */
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
-    --ring: 217 91% 60%;
+    --ring: 0 0% 9%;
 
     --radius: 0.5rem;
   }
@@ -82,8 +82,8 @@
     --popover: 0 0% 8%;
     --popover-foreground: 0 0% 98%;
 
-    /* Primary brand color */
-    --primary: 217 91% 60%;
+    /* Primary brand color - near white */
+    --primary: 0 0% 98%;
     --primary-foreground: 0 0% 9%;
 
     /* Secondary surfaces */
@@ -105,6 +105,6 @@
     /* Borders and inputs */
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
-    --ring: 217 91% 60%;
+    --ring: 0 0% 98%;
   }
 }

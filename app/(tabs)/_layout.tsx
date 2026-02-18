@@ -28,7 +28,7 @@ export default function TabLayout() {
   if (!isInitialized || isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-surface-dark">
-        <ActivityIndicator size="large" color="#3b82f6" />
+        <ActivityIndicator size="large" color={colorScheme === 'dark' ? '#ffffff' : '#000000'} />
       </View>
     );
   }

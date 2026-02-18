@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
 import { useCreateTransaction } from '@/hooks/mutations/use-wallet-mutations';
-import { createTransactionRequestSchema } from '@/schemas';
 import { useWalletStore } from '@/stores/wallet-store';
 
 type TransactionDialogProps = {
