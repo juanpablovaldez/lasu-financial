@@ -4,7 +4,6 @@ import { View } from 'react-native';
 
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
@@ -50,8 +49,8 @@ export function TransactionDialog({ open, onOpenChange, type }: TransactionDialo
         },
         {
           onSuccess: () => {
-            const actionText = type === 'deposit' ? 'Depósito' : 'Retiro';
-            setSuccessMessage(`${actionText} completado exitosamente`);
+            const actionText = type === 'deposit' ? 'depósito' : 'retiro';
+            setSuccessMessage(`Solicitud de ${actionText} enviada, pendiente de aprobación`);
             setTimeout(() => setSuccessMessage(null), 3000);
             onOpenChange(false);
             form.reset();
@@ -119,11 +118,9 @@ export function TransactionDialog({ open, onOpenChange, type }: TransactionDialo
                 <Text>Cancelar</Text>
               </Button>
             </AlertDialogCancel>
-            <AlertDialogAction asChild>
-              <Button onPress={() => form.handleSubmit()} disabled={isPending}>
-                <Text>{isPending ? 'Procesando...' : actionLabel}</Text>
-              </Button>
-            </AlertDialogAction>
+            <Button onPress={() => form.handleSubmit()} disabled={isPending}>
+              <Text>{isPending ? 'Procesando...' : actionLabel}</Text>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
