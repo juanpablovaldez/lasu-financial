@@ -9,6 +9,7 @@ import { useColorScheme as useNativeWindColorScheme } from 'nativewind';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
+import { Toaster } from '@/components/ui/toaster';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { NAV_THEME } from '@/lib/constants';
 import { AuthProvider } from '@/providers/auth-provider';
@@ -53,6 +54,7 @@ export default function RootLayout() {
             <Stack.Screen name="+not-found" options={{ headerShown: false }} />
           </Stack>
           <StatusBar style="auto" />
+          <Toaster />
           <PortalHost />
         </ThemeProvider>
       </AuthProvider>
