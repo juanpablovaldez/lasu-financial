@@ -1,5 +1,5 @@
 import { useForm } from '@tanstack/react-form';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { Mail } from 'lucide-react-native';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, View } from 'react-native';
@@ -9,7 +9,7 @@ import { Announcement } from '@/components/ui/announcement';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
-import { supabase } from '@/lib/supabase';
+import { useForgotPassword } from '@/hooks/mutations/use-auth-mutations';
 
 // ─── Schema ────────────────────────────────────────────────────────────────
 
@@ -20,39 +20,27 @@ const forgotPasswordSchema = z.object({
 // ─── Screen Component ──────────────────────────────────────────────────────
 
 export default function ForgotPasswordScreen() {
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Form setup
+  const { mutate: forgotPassword, isPending } = useForgotPassword();
+
   const form = useForm({
     defaultValues: {
       email: '',
     },
     onSubmit: async ({ value }) => {
-      setIsLoading(true);
       setError(null);
-      setSuccessMessage(null);
-
-      try {
-        const { error: resetError } = await supabase.auth.resetPasswordForEmail(value.email, {
-          redirectTo: 'lasufinancial://auth/callback',
-        });
-
-        if (resetError) {
-          throw resetError;
-        }
-
-        setSuccessMessage(
-          '¡Correo enviado! Revisa tu bandeja de entrada para restablecer tu contraseña.',
-        );
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : 'Error al enviar el correo de restablecimiento';
-        setError(message);
-      } finally {
-        setIsLoading(false);
-      }
+      forgotPassword(value.email, {
+        onSuccess: () => {
+          router.push(
+            `/(auth)/verify-otp-recovery?email=${encodeURIComponent(value.email)}` as never,
+          );
+        },
+        onError: (err) => {
+          setError(err.message);
+        },
+      });
     },
   });
 
@@ -72,23 +60,9 @@ export default function ForgotPasswordScreen() {
             Restablecer contraseña
           </Text>
           <Text className="text-base text-muted-foreground">
-            Te enviaremos un enlace de restablecimiento a tu correo
+            Te enviaremos un código de verificación a tu correo
           </Text>
         </View>
-
-        {/* Success Message */}
-        {successMessage && (
-          <View className="rounded-xl border border-green-500 bg-green-500/10 px-4 py-3">
-            <Text className="text-sm text-green-600">{successMessage}</Text>
-            <Link href="/(auth)/sign-in" asChild>
-              <TouchableOpacity className="mt-2">
-                <Text className="text-sm font-medium text-green-600">
-                  Volver a Iniciar Sesión →
-                </Text>
-              </TouchableOpacity>
-            </Link>
-          </View>
-        )}
 
         {/* Error Banner */}
         {error && (
@@ -98,18 +72,15 @@ export default function ForgotPasswordScreen() {
         )}
 
         {/* Screen reader announcements */}
-        <Announcement message={successMessage} politeness="polite" />
         <Announcement message={error} politeness="assertive" />
 
         {/* Form */}
         <View className="gap-4">
-          {/* Email Field */}
           <form.Field
             name="email"
             validators={{
               onBlur: ({ value }) => {
                 const result = forgotPasswordSchema.shape.email.safeParse(value);
-
                 return result.success ? undefined : result.error.errors[0]?.message;
               },
             }}
@@ -127,15 +98,15 @@ export default function ForgotPasswordScreen() {
                 autoCapitalize="none"
                 autoComplete="email"
                 autoFocus
-                editable={!successMessage}
+                editable={!isPending}
               />
             )}
           </form.Field>
         </View>
 
         {/* Submit Button */}
-        <Button onPress={() => form.handleSubmit()} disabled={isLoading || !!successMessage}>
-          <Text>{isLoading ? 'Enviando...' : 'Enviar enlace de restablecimiento'}</Text>
+        <Button onPress={() => form.handleSubmit()} disabled={isPending}>
+          <Text>{isPending ? 'Enviando...' : 'Enviar código de verificación'}</Text>
         </Button>
 
         {/* Footer */}
