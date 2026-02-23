@@ -3,13 +3,17 @@ import { useMutation } from '@tanstack/react-query';
 
 import { supabase } from '@/lib/supabase';
 import {
+  resendOtpRequestSchema,
   signInRequestSchema,
   signInResponseSchema,
   signUpRequestSchema,
   signUpResponseSchema,
+  verifyOtpRequestSchema,
   type OAuthProvider,
+  type ResendOtpRequest,
   type SignInRequest,
   type SignUpRequest,
+  type VerifyOtpRequest,
 } from '@/schemas';
 import { useAdminStore } from '@/stores/admin-store';
 import { useAuthStore } from '@/stores/auth-store';
@@ -220,6 +224,43 @@ export function useSignInWithOAuth() {
       }
 
       return data;
+    },
+  });
+}
+
+// ─── Verify OTP Mutation ───────────────────────────────────────────────────
+
+export function useVerifyOtp() {
+  return useMutation({
+    mutationFn: async (payload: VerifyOtpRequest) => {
+      const validated = verifyOtpRequestSchema.parse(payload);
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: validated.email,
+        token: validated.token,
+        type: validated.type,
+      });
+      if (error) throw new Error(mapAuthError(error));
+      return signInResponseSchema.parse(data);
+    },
+    onSuccess: (data) => {
+      if (data.session?.user) {
+        useAuthStore.getState().setSession(data.session.user.id, data.session.user.email ?? '');
+      }
+    },
+  });
+}
+
+// ─── Resend OTP Mutation ───────────────────────────────────────────────────
+
+export function useResendOtp() {
+  return useMutation({
+    mutationFn: async (payload: ResendOtpRequest) => {
+      const validated = resendOtpRequestSchema.parse(payload);
+      const { error } = await supabase.auth.resend({
+        type: validated.type,
+        email: validated.email,
+      });
+      if (error) throw new Error(mapAuthError(error));
     },
   });
 }
