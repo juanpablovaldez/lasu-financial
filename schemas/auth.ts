@@ -85,3 +85,16 @@ export type SignUpResponse = z.infer<typeof signUpResponseSchema>;
 export const oauthProviderSchema = z.enum(['google', 'apple', 'github', 'facebook']);
 
 export type OAuthProvider = z.infer<typeof oauthProviderSchema>;
+
+export const verifyOtpRequestSchema = z.object({
+  email: z.string().email(),
+  token: z.string().length(6, 'El código debe tener 6 dígitos'),
+  type: z.enum(['signup', 'email']),
+});
+export type VerifyOtpRequest = z.infer<typeof verifyOtpRequestSchema>;
+
+export const resendOtpRequestSchema = z.object({
+  email: z.string().email(),
+  type: z.enum(['signup']),
+});
+export type ResendOtpRequest = z.infer<typeof resendOtpRequestSchema>;

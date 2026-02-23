@@ -9,17 +9,21 @@
  */
 export {
   oauthProviderSchema,
+  resendOtpRequestSchema,
   signInRequestSchema,
   signInResponseSchema,
   signUpRequestSchema,
   signUpResponseSchema,
   supabaseSessionSchema,
+  verifyOtpRequestSchema,
   type OAuthProvider,
+  type ResendOtpRequest,
   type SignInRequest,
   type SignInResponse,
   type SignUpRequest,
   type SignUpResponse,
   type SupabaseSession,
+  type VerifyOtpRequest,
 } from './auth';
 export { instrumentListSchema, instrumentSchema, type Instrument } from './instrument';
 export { userSchema, type User } from './user';
