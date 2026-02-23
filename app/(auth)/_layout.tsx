@@ -6,7 +6,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAdminStore } from '@/stores/admin-store';
 
 export default function AuthLayout() {
-  const { session, isLoading, isInitialized } = useAuth();
+  const { session, isLoading, isInitialized, isPasswordRecovery } = useAuth();
   const { isAdmin, isHydrated } = useAdminStore();
   const colorScheme = useColorScheme();
 
@@ -18,7 +18,7 @@ export default function AuthLayout() {
     );
   }
 
-  if (session) {
+  if (session && !isPasswordRecovery) {
     return <Redirect href={isAdmin ? '/(admin)' : '/(tabs)'} />;
   }
 

@@ -228,6 +228,57 @@ export function useSignInWithOAuth() {
   });
 }
 
+// ─── Forgot Password Mutation ─────────────────────────────────────────────
+
+/**
+ * Sends a password reset OTP to the provided email address.
+ * On success, navigate to the OTP verification screen.
+ */
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: async (email: string) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) throw new Error(mapAuthError(error));
+    },
+  });
+}
+
+// ─── Verify Recovery OTP Mutation ─────────────────────────────────────────
+
+/**
+ * Verifies a password-recovery OTP.
+ * Unlike useVerifyOtp, this does NOT update the auth store — the recovery
+ * session is held internally by the Supabase client so that updateUser works,
+ * but the app stays on the auth screens until the user sets a new password.
+ */
+export function useVerifyRecoveryOtp() {
+  return useMutation({
+    mutationFn: async ({ email, token }: { email: string; token: string }) => {
+      const { error } = await supabase.auth.verifyOtp({ email, token, type: 'recovery' });
+      if (error) throw new Error(mapAuthError(error));
+    },
+  });
+}
+
+// ─── Reset Password Mutation ───────────────────────────────────────────────
+
+/**
+ * Updates the authenticated user's password (requires an active recovery session).
+ * Signs out after a successful update so the user must log in with the new password.
+ */
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: async (password: string) => {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw new Error(mapAuthError(error));
+    },
+    onSuccess: async () => {
+      await supabase.auth.signOut();
+      useAuthStore.getState().clearSession();
+    },
+  });
+}
+
 // ─── Verify OTP Mutation ───────────────────────────────────────────────────
 
 export function useVerifyOtp() {

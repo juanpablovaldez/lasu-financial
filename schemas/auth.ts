@@ -89,7 +89,7 @@ export type OAuthProvider = z.infer<typeof oauthProviderSchema>;
 export const verifyOtpRequestSchema = z.object({
   email: z.string().email(),
   token: z.string().length(6, 'El código debe tener 6 dígitos'),
-  type: z.enum(['signup', 'email']),
+  type: z.enum(['signup', 'email', 'recovery']),
 });
 export type VerifyOtpRequest = z.infer<typeof verifyOtpRequestSchema>;
 

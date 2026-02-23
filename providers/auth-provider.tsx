@@ -14,6 +14,7 @@ interface AuthContextValue {
   isLoading: boolean;
   isInitialized: boolean;
   isAuthenticated: boolean;
+  isPasswordRecovery: boolean;
 }
 
 // ─── Context ───────────────────────────────────────────────────────────────
@@ -51,6 +52,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   // Wait for Zustand to hydrate from MMKV before showing UI
   const isHydrated = useAuthStore((state) => state.isHydrated);
@@ -112,6 +114,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      if (__DEV__) {
+        console.log('Auth event:', event, currentSession?.user?.id);
+      }
+
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsPasswordRecovery(true);
+        setSession(currentSession);
+        return;
+      }
+
+      setIsPasswordRecovery(false);
       setSession(currentSession);
 
       if (currentSession?.user) {
@@ -119,10 +132,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       } else {
         useAuthStore.getState().clearSession();
         setUser(null);
-      }
-
-      if (__DEV__) {
-        console.log('Auth event:', event, currentSession?.user?.id);
       }
     });
 
@@ -169,7 +178,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     user,
     isLoading,
     isInitialized,
-    isAuthenticated: !!session,
+    isAuthenticated: !!session && !isPasswordRecovery,
+    isPasswordRecovery,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
