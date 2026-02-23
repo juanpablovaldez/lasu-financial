@@ -32,14 +32,9 @@ export function useAdminRole() {
           .select('*')
           .eq('user_id', userId)
           .is('revoked_at', null)
-          .single();
+          .maybeSingle();
 
         if (error) {
-          // If no role found, clear admin status
-          if (error.code === 'PGRST116') {
-            clearAdminRole();
-            return;
-          }
           throw error;
         }
 

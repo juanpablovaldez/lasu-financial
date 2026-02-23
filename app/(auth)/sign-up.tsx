@@ -24,7 +24,6 @@ export default function SignUpScreen() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const { mutate: signUp, isPending, error } = useSignUp();
 
@@ -46,13 +45,14 @@ export default function SignUpScreen() {
         {
           onSuccess: (data) => {
             if (data.session) {
-              // Auto sign-in (no email confirmation required)
+              // Auto sign-in (email confirmation disabled)
               router.replace('/(tabs)');
             } else {
-              // Email confirmation required
-              setSuccessMessage(
-                '¡Cuenta creada! Por favor, verifica tu correo electrónico antes de iniciar sesión.',
-              );
+              // Navigate to OTP verification screen
+              router.push({
+                pathname: '/(auth)/verify-otp',
+                params: { email: value.email },
+              });
             }
           },
         },
@@ -76,18 +76,6 @@ export default function SignUpScreen() {
           <Text className="text-base text-muted-foreground">Únete a miles de inversores</Text>
         </View>
 
-        {/* Success Message */}
-        {successMessage && (
-          <View className="rounded-xl border border-green-500 bg-green-500/10 px-4 py-3">
-            <Text className="text-sm text-green-600">{successMessage}</Text>
-            <Link href="/(auth)/sign-in" asChild>
-              <TouchableOpacity className="mt-2">
-                <Text className="text-sm font-medium text-green-600">Ir a Iniciar Sesión →</Text>
-              </TouchableOpacity>
-            </Link>
-          </View>
-        )}
-
         {/* Error Banner */}
         {error && (
           <View className="rounded-xl border border-destructive bg-destructive/10 px-4 py-3">
@@ -96,7 +84,6 @@ export default function SignUpScreen() {
         )}
 
         {/* Screen reader announcements */}
-        <Announcement message={successMessage} politeness="polite" />
         <Announcement message={error?.message} politeness="assertive" />
 
         {/* Form */}
@@ -250,7 +237,7 @@ export default function SignUpScreen() {
         </View>
 
         {/* Submit Button */}
-        <Button onPress={() => form.handleSubmit()} disabled={isPending || !!successMessage}>
+        <Button onPress={() => form.handleSubmit()} disabled={isPending}>
           <Text>{isPending ? 'Creando cuenta...' : 'Crear cuenta'}</Text>
         </Button>
 
