@@ -25,6 +25,7 @@ const MAPPING = {
   xmark: 'close',
   'rectangle.portrait.and.arrow.right': 'logout',
   iphone: 'smartphone',
+  dollarsign: 'attach-money',
 } as IconMapping;
 
 /**
