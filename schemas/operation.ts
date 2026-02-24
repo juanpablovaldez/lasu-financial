@@ -7,7 +7,7 @@ export type OperationType = z.infer<typeof operationTypeSchema>;
 export const operationStatusSchema = z.enum(['pending', 'completed', 'cancelled', 'failed']);
 export type OperationStatus = z.infer<typeof operationStatusSchema>;
 
-export const currencySchema = z.enum(['USD', 'ARS']);
+export const currencySchema = z.literal('USD');
 export type Currency = z.infer<typeof currencySchema>;
 
 // Operation record

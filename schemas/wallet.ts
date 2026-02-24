@@ -17,8 +17,7 @@ export const transactionSchema = z.object({
   user_id: z.string().uuid(),
   type: z.enum(['deposit', 'withdrawal']),
   amount: z.number().positive(),
-  currency: z.enum(['USD', 'ARS']),
-  exchange_rate: z.number().nullish(),
+  currency: z.string(),
   status: z.enum(['pending', 'completed', 'failed']),
   description: z.string().nullish(),
   created_at: z.string(),
@@ -36,24 +35,12 @@ export const transactionSchema = z.object({
 export type Transaction = z.infer<typeof transactionSchema>;
 export const transactionListSchema = z.array(transactionSchema);
 
-// Exchange Rate Schema
-export const exchangeRateSchema = z.object({
-  usd_to_ars: z.number().positive(),
-  last_updated: z.string(),
-  source: z.string(),
-});
-
-export type ExchangeRate = z.infer<typeof exchangeRateSchema>;
-
 // Request Schemas
 export const createTransactionRequestSchema = z.object({
   type: z.enum(['deposit', 'withdrawal']),
   amount: z.number().positive('El monto debe ser mayor a 0'),
-  currency: z.enum(['USD', 'ARS']),
+  currency: z.literal('USD'),
   description: z.string().optional(),
 });
 
 export type CreateTransactionRequest = z.infer<typeof createTransactionRequestSchema>;
-
-export const currencyPreferenceSchema = z.enum(['USD', 'ARS']);
-export type CurrencyPreference = z.infer<typeof currencyPreferenceSchema>;

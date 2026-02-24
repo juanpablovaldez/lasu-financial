@@ -10,7 +10,6 @@ import {
 import { useAuthStore } from '@/stores/auth-store';
 
 import { balanceKeys } from '../queries/use-balance';
-import { useExchangeRate } from '../queries/use-exchange-rate';
 import { transactionKeys } from '../queries/use-transactions';
 
 /**
@@ -19,7 +18,6 @@ import { transactionKeys } from '../queries/use-transactions';
 async function createTransaction(
   request: CreateTransactionRequest,
   userId: string,
-  exchangeRate?: number,
 ): Promise<Transaction> {
   const validated = createTransactionRequestSchema.parse(request);
 
@@ -30,7 +28,7 @@ async function createTransaction(
       type: validated.type,
       amount: validated.amount,
       currency: validated.currency,
-      exchange_rate: validated.currency === 'ARS' ? exchangeRate : null,
+      exchange_rate: null,
       status: 'pending',
       description: validated.description || null,
     })
@@ -64,11 +62,9 @@ async function createTransaction(
 export function useCreateTransaction() {
   const queryClient = useQueryClient();
   const userId = useAuthStore((state) => state.userId);
-  const { data: exchangeRate } = useExchangeRate();
 
   return useMutation({
-    mutationFn: (request: CreateTransactionRequest) =>
-      createTransaction(request, userId!, exchangeRate?.usd_to_ars),
+    mutationFn: (request: CreateTransactionRequest) => createTransaction(request, userId!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: balanceKeys.all });
       queryClient.invalidateQueries({ queryKey: transactionKeys.all });

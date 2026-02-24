@@ -30,14 +30,10 @@ export { userSchema, type User } from './user';
 export {
   balanceSchema,
   createTransactionRequestSchema,
-  currencyPreferenceSchema,
-  exchangeRateSchema,
   transactionListSchema,
   transactionSchema,
   type Balance,
   type CreateTransactionRequest,
-  type CurrencyPreference,
-  type ExchangeRate,
   type Transaction,
 } from './wallet';
 export {

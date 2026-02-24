@@ -71,7 +71,6 @@ export default function TransactionDetailScreen() {
   }
 
   const isDeposit = transaction.type === 'deposit';
-  const locale = transaction.currency === 'USD' ? 'en-US' : 'es-AR';
   const Icon = isDeposit ? ArrowDownToLine : ArrowUpFromLine;
 
   return (
@@ -95,7 +94,7 @@ export default function TransactionDetailScreen() {
             )}
           >
             {isDeposit ? '+' : '-'}
-            {formatCurrency(transaction.amount, transaction.currency, locale)}
+            {formatCurrency(transaction.amount, 'USD', 'en-US')}
           </Text>
           <StatusBadge status={transaction.status} />
         </View>
@@ -114,15 +113,6 @@ export default function TransactionDetailScreen() {
                 <DetailRow
                   label="Fecha de completado"
                   value={formatDate(transaction.completed_at)}
-                />
-              </>
-            )}
-            {transaction.exchange_rate != null && (
-              <>
-                <Separator />
-                <DetailRow
-                  label="Tipo de cambio"
-                  value={`1 USD = ${transaction.exchange_rate.toFixed(2)} ARS`}
                 />
               </>
             )}
