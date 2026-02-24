@@ -1,4 +1,5 @@
 import { useForm } from '@tanstack/react-form';
+import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react-native';
 import { useState } from 'react';
@@ -14,7 +15,7 @@ import {
 import { Announcement } from '@/components/ui/announcement';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/text-input';
-import { useSignIn } from '@/hooks/mutations/use-auth-mutations';
+import { useSignIn, useSignInWithOAuth } from '@/hooks/mutations/use-auth-mutations';
 import { supabase } from '@/lib/supabase';
 import { signInRequestSchema } from '@/schemas';
 import { useAdminStore } from '@/stores/admin-store';
@@ -24,8 +25,38 @@ import { useAdminStore } from '@/stores/admin-store';
 export default function SignInScreen() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [oauthError, setOauthError] = useState<string | null>(null);
 
   const { mutate: signIn, isPending, error } = useSignIn();
+  const { mutate: signInWithOAuth, isPending: isOAuthPending } = useSignInWithOAuth();
+
+  async function handleGoogleSignIn() {
+    setOauthError(null);
+    signInWithOAuth('google', {
+      onSuccess: async (data) => {
+        if (!data) return; // user cancelled
+
+        const userId = data.session?.user?.id;
+        if (userId) {
+          const { data: adminData } = await supabase
+            .from('admin_roles')
+            .select('role')
+            .eq('user_id', userId)
+            .is('revoked_at', null)
+            .single();
+
+          if (adminData?.role === 'super_admin' || adminData?.role === 'admin') {
+            useAdminStore.getState().setAdminRole(adminData.role);
+            router.replace('/(admin)');
+            return;
+          }
+        }
+        useAdminStore.getState().clearAdminRole();
+        router.replace('/(tabs)');
+      },
+      onError: (err) => setOauthError(err.message),
+    });
+  }
 
   const form = useForm({
     defaultValues: {
@@ -76,14 +107,14 @@ export default function SignInScreen() {
         </View>
 
         {/* Error Banner */}
-        {error && (
+        {(error || oauthError) && (
           <View className="rounded-xl border border-destructive bg-destructive/10 px-4 py-3">
-            <Text className="text-sm text-destructive">{error.message}</Text>
+            <Text className="text-sm text-destructive">{error?.message ?? oauthError}</Text>
           </View>
         )}
 
         {/* Screen reader announcement for errors */}
-        <Announcement message={error?.message} politeness="assertive" />
+        <Announcement message={error?.message ?? oauthError ?? undefined} politeness="assertive" />
 
         {/* Form */}
         <View className="gap-4">
@@ -188,10 +219,19 @@ export default function SignInScreen() {
             <View className="h-px flex-1 bg-border" />
           </View>
 
-          {/* OAuth Buttons - Placeholder for future implementation */}
-          <Text className="text-center text-sm text-muted-foreground">
-            Pronto disponible (Google, Apple, etc.)
-          </Text>
+          {/* Google OAuth Button */}
+          <Button
+            variant="outline"
+            onPress={handleGoogleSignIn}
+            disabled={isOAuthPending || isPending}
+            accessibilityLabel="Continuar con Google"
+            accessibilityRole="button"
+          >
+            <Ionicons name="logo-google" size={18} />
+            <Text className="text-foreground">
+              {isOAuthPending ? 'Abriendo Google...' : 'Continuar con Google'}
+            </Text>
+          </Button>
         </View>
 
         {/* Footer */}

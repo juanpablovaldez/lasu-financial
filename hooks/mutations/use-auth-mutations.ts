@@ -1,5 +1,8 @@
 import type { AuthError } from '@supabase/supabase-js';
 import { useMutation } from '@tanstack/react-query';
+import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
+import { useDevice } from '../use-device';
 
 import { supabase } from '@/lib/supabase';
 import {
@@ -190,32 +193,44 @@ export function useSignOut() {
 /**
  * Hook for signing in with OAuth providers (Google, Apple, GitHub, Facebook).
  *
- * Note: Requires deep linking setup for native platforms.
- * See app.json for scheme configuration.
+ * Uses the PKCE flow with expo-web-browser for native platforms.
+ * The browser opens the provider's login page, then exchanges the code for a session.
  *
  * @example
  * ```ts
  * const { mutate: signInWithOAuth } = useSignInWithOAuth();
  *
- * signInWithOAuth({
- *   provider: 'google',
- *   redirectTo: 'lasufinancial://auth/callback'
+ * signInWithOAuth('google', {
+ *   onSuccess: (data) => {
+ *     if (data) router.replace('/(tabs)');
+ *   },
  * });
  * ```
  */
 export function useSignInWithOAuth() {
+  const { isWeb } = useDevice();
   return useMutation({
-    mutationFn: async ({
-      provider,
-      redirectTo,
-    }: {
-      provider: OAuthProvider;
-      redirectTo?: string;
-    }) => {
+    mutationFn: async (provider: OAuthProvider) => {
+      const redirectTo = Linking.createURL('auth/callback');
+
+      if (isWeb) {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: { redirectTo },
+        });
+
+        if (error) {
+          throw new Error(mapAuthError(error));
+        }
+
+        return null;
+      }
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo,
+          skipBrowserRedirect: true,
         },
       });
 
@@ -223,7 +238,31 @@ export function useSignInWithOAuth() {
         throw new Error(mapAuthError(error));
       }
 
-      return data;
+      if (!data.url) {
+        throw new Error('No se pudo obtener la URL de autenticación.');
+      }
+
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+
+      if (result.type !== 'success') {
+        // User cancelled or browser dismissed — not an error
+        return null;
+      }
+
+      const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(
+        result.url,
+      );
+
+      if (sessionError) {
+        throw new Error(mapAuthError(sessionError));
+      }
+
+      return sessionData;
+    },
+    onSuccess: (data) => {
+      if (data?.session?.user) {
+        useAuthStore.getState().setSession(data.session.user.id, data.session.user.email ?? '');
+      }
     },
   });
 }
