@@ -19,11 +19,6 @@ const OPERATION_TYPES = [
   { value: 'transfer', label: 'Transferencia' },
 ] as const;
 
-const CURRENCIES = [
-  { value: 'USD', label: 'USD' },
-  { value: 'ARS', label: 'ARS' },
-] as const;
-
 export default function CreateOperationScreen() {
   const router = useRouter();
   const { mutate: createOperation, isPending } = useCreateOperation();
@@ -34,7 +29,6 @@ export default function CreateOperationScreen() {
   const [selectedUserId, setSelectedUserId] = useState('');
   const [operationType, setOperationType] = useState<string>('buy');
   const [totalAmountUsd, setTotalAmountUsd] = useState('');
-  const [currency, setCurrency] = useState<string>('USD');
   const [feeAmount, setFeeAmount] = useState('');
   const [description, setDescription] = useState('');
   const [instrumentId, setInstrumentId] = useState('');
@@ -48,7 +42,7 @@ export default function CreateOperationScreen() {
       user_id: selectedUserId,
       operation_type: operationType,
       total_amount_usd: parseFloat(totalAmountUsd) || 0,
-      currency,
+      currency: 'USD',
       fee_amount: parseFloat(feeAmount) || 0,
       description: description.trim() || undefined,
       ...(isBuySell && {
@@ -114,23 +108,6 @@ export default function CreateOperationScreen() {
             placeholder="0.00"
             keyboardType="decimal-pad"
           />
-        </View>
-
-        {/* Currency */}
-        <View className="gap-1">
-          <Text className="text-sm font-medium text-muted-foreground">Moneda</Text>
-          <View className="flex-row gap-2">
-            {CURRENCIES.map(({ value, label }) => (
-              <Button
-                key={value}
-                variant={currency === value ? 'default' : 'outline'}
-                size="sm"
-                onPress={() => setCurrency(value)}
-              >
-                <Text>{label}</Text>
-              </Button>
-            ))}
-          </View>
         </View>
 
         {/* Fee */}

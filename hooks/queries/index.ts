@@ -6,7 +6,6 @@
  */
 export { adminKeys } from './use-admin-dashboard';
 export { balanceKeys } from './use-balance';
-export { exchangeRateKeys } from './use-exchange-rate';
 export { infiniteTransactionKeys } from './use-infinite-transactions';
 export { instrumentKeys } from './use-instruments';
 export { useAdminTransaction } from './use-admin-transaction';

@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Colors } from '@/constants/colors';
 import { balanceKeys } from '@/hooks/queries/use-balance';
-import { exchangeRateKeys } from '@/hooks/queries/use-exchange-rate';
 import { transactionKeys } from '@/hooks/queries/use-transactions';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -29,7 +28,6 @@ export default function WalletScreen() {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: balanceKeys.all }),
       queryClient.invalidateQueries({ queryKey: transactionKeys.all }),
-      queryClient.invalidateQueries({ queryKey: exchangeRateKeys.all }),
     ]);
     setIsRefreshing(false);
   }, [queryClient]);
