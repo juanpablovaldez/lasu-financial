@@ -14,10 +14,7 @@ import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
 import { useCreateTransaction } from '@/hooks/mutations/use-wallet-mutations';
 import { useBalance } from '@/hooks/queries/use-balance';
-import { useExchangeRate } from '@/hooks/queries/use-exchange-rate';
-import { convertUsdToArs } from '@/lib/currency';
 import { toast } from '@/stores/toast-store';
-import { useWalletStore } from '@/stores/wallet-store';
 
 type TransactionDialogProps = {
   open: boolean;
@@ -26,28 +23,16 @@ type TransactionDialogProps = {
 };
 
 export function TransactionDialog({ open, onOpenChange, type }: TransactionDialogProps) {
-  const preferredCurrency = useWalletStore((state) => state.preferredCurrency);
   const { mutate, isPending, error } = useCreateTransaction();
   const { data: balance } = useBalance();
-  const { data: exchangeRate } = useExchangeRate();
-
-  const getAvailableBalance = (): number | null => {
-    if (!balance) return null;
-    if (preferredCurrency === 'ARS') {
-      if (!exchangeRate) return null;
-      return convertUsdToArs(balance.amount_usd, exchangeRate.usd_to_ars);
-    }
-    return balance.amount_usd;
-  };
 
   const validateWithdrawalAmount = (value: string): string | undefined => {
     if (type !== 'withdrawal') return undefined;
     const amount = parseFloat(value);
     if (isNaN(amount) || amount <= 0) return undefined;
-    const available = getAvailableBalance();
-    if (available === null) return undefined;
-    if (amount > available) {
-      return `Saldo insuficiente. Disponible: ${available.toFixed(2)} ${preferredCurrency}`;
+    if (!balance) return undefined;
+    if (amount > balance.amount_usd) {
+      return `Saldo insuficiente. Disponible: ${balance.amount_usd.toFixed(2)} USD`;
     }
     return undefined;
   };
@@ -64,18 +49,15 @@ export function TransactionDialog({ open, onOpenChange, type }: TransactionDialo
         return;
       }
 
-      if (type === 'withdrawal') {
-        const available = getAvailableBalance();
-        if (available !== null && amount > available) {
-          return;
-        }
+      if (type === 'withdrawal' && balance !== undefined && amount > balance.amount_usd) {
+        return;
       }
 
       mutate(
         {
           type,
           amount,
-          currency: preferredCurrency,
+          currency: 'USD',
           description: value.description || undefined,
         },
         {
@@ -114,12 +96,12 @@ export function TransactionDialog({ open, onOpenChange, type }: TransactionDialo
           >
             {(field) => (
               <TextInput
-                label="Monto"
+                label="Monto (USD)"
                 keyboardType="decimal-pad"
                 value={field.state.value}
                 onChangeText={field.handleChange}
                 onBlur={field.handleBlur}
-                placeholder={`0.00 ${preferredCurrency}`}
+                placeholder="0.00"
                 error={field.state.meta.errors[0] as string | undefined}
               />
             )}
