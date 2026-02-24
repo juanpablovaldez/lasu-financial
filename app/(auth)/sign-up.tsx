@@ -1,4 +1,5 @@
 import { useForm } from '@tanstack/react-form';
+import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react-native';
 import { useState } from 'react';
@@ -15,7 +16,7 @@ import { z } from 'zod';
 import { Announcement } from '@/components/ui/announcement';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/text-input';
-import { useSignUp } from '@/hooks/mutations/use-auth-mutations';
+import { useSignUp, useSignInWithOAuth } from '@/hooks/mutations/use-auth-mutations';
 import { signUpRequestSchema } from '@/schemas';
 
 // ─── Screen Component ──────────────────────────────────────────────────────
@@ -24,8 +25,21 @@ export default function SignUpScreen() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [oauthError, setOauthError] = useState<string | null>(null);
 
   const { mutate: signUp, isPending, error } = useSignUp();
+  const { mutate: signInWithOAuth, isPending: isOAuthPending } = useSignInWithOAuth();
+
+  function handleGoogleSignUp() {
+    setOauthError(null);
+    signInWithOAuth('google', {
+      onSuccess: (data) => {
+        if (!data) return; // user cancelled
+        router.replace('/(tabs)');
+      },
+      onError: (err) => setOauthError(err.message),
+    });
+  }
 
   // Form setup
   const form = useForm({
@@ -77,14 +91,14 @@ export default function SignUpScreen() {
         </View>
 
         {/* Error Banner */}
-        {error && (
+        {(error || oauthError) && (
           <View className="rounded-xl border border-destructive bg-destructive/10 px-4 py-3">
-            <Text className="text-sm text-destructive">{error.message}</Text>
+            <Text className="text-sm text-destructive">{error?.message ?? oauthError}</Text>
           </View>
         )}
 
         {/* Screen reader announcements */}
-        <Announcement message={error?.message} politeness="assertive" />
+        <Announcement message={error?.message ?? oauthError ?? undefined} politeness="assertive" />
 
         {/* Form */}
         <View className="gap-4">
@@ -237,9 +251,32 @@ export default function SignUpScreen() {
         </View>
 
         {/* Submit Button */}
-        <Button onPress={() => form.handleSubmit()} disabled={isPending}>
-          <Text>{isPending ? 'Creando cuenta...' : 'Crear cuenta'}</Text>
-        </Button>
+        <View className="gap-4">
+          <Button onPress={() => form.handleSubmit()} disabled={isPending || isOAuthPending}>
+            <Text>{isPending ? 'Creando cuenta...' : 'Crear cuenta'}</Text>
+          </Button>
+
+          {/* Divider */}
+          <View className="flex-row items-center gap-4">
+            <View className="h-px flex-1 bg-border" />
+            <Text className="text-sm text-muted-foreground">O continuar con</Text>
+            <View className="h-px flex-1 bg-border" />
+          </View>
+
+          {/* Google OAuth Button */}
+          <Button
+            variant="outline"
+            onPress={handleGoogleSignUp}
+            disabled={isOAuthPending || isPending}
+            accessibilityLabel="Continuar con Google"
+            accessibilityRole="button"
+          >
+            <Ionicons name="logo-google" size={18} />
+            <Text className="text-foreground">
+              {isOAuthPending ? 'Abriendo Google...' : 'Continuar con Google'}
+            </Text>
+          </Button>
+        </View>
 
         {/* Footer */}
         <View className="flex-row items-center justify-center gap-2">
