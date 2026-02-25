@@ -15,4 +15,5 @@ export { transactionDetailKeys } from './use-transaction';
 export { transactionKeys } from './use-transactions';
 export { userOperationKeys, useUserOperations } from './use-user-operations';
 export { performanceKeys, usePerformanceData } from './use-performance-data';
+export { userPerformanceKeys, useUserPerformanceData } from './use-user-performance-data';
 export { useUserActivity } from './use-user-activity';
