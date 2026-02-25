@@ -58,6 +58,11 @@ const MENU_ITEMS: MenuItem[] = [
     icon: 'doc.text.fill',
     path: '/(admin)/audit-logs',
   },
+  {
+    label: 'Rendimiento',
+    icon: 'chart.line.uptrend.xyaxis',
+    path: '/(admin)/gain-loss',
+  },
 ];
 
 interface AdminSidebarProps {

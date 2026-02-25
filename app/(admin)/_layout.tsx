@@ -43,6 +43,7 @@ export default function AdminLayout() {
           <Stack.Screen name="users/index" />
           <Stack.Screen name="users/[id]" />
           <Stack.Screen name="audit-logs" />
+          <Stack.Screen name="gain-loss" />
         </Stack>
       </View>
       <AdminBottomBar />

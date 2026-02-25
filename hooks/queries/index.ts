@@ -13,3 +13,6 @@ export { useAdminTransaction } from './use-admin-transaction';
 export { useAdminUser, useAdminUsers } from './use-admin-users';
 export { transactionDetailKeys } from './use-transaction';
 export { transactionKeys } from './use-transactions';
+export { userOperationKeys, useUserOperations } from './use-user-operations';
+export { performanceKeys, usePerformanceData } from './use-performance-data';
+export { useUserActivity } from './use-user-activity';

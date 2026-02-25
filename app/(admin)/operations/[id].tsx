@@ -45,7 +45,11 @@ export default function OperationDetailScreen() {
           <CardContent className="gap-3">
             <View className="flex-row justify-between">
               <Text className="text-muted-foreground">Tipo:</Text>
-              <Text className="font-semibold">{typeLabels[operation.operation_type]}</Text>
+              <Text className="font-semibold">
+                {typeLabels[operation.operation_type as keyof typeof typeLabels] ??
+                  operation.operation_type.charAt(0).toUpperCase() +
+                    operation.operation_type.slice(1)}
+              </Text>
             </View>
 
             <View className="flex-row justify-between">
