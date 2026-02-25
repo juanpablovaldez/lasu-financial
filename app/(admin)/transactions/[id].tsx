@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { CircleAlert } from 'lucide-react-native';
+import { Building2, CircleAlert, Coins, MapPin } from 'lucide-react-native';
 import { useState } from 'react';
 import { ActivityIndicator, ScrollView, View } from 'react-native';
 
@@ -90,6 +90,35 @@ export default function TransactionApprovalScreen() {
 
   const typeLabel = transaction.type === 'deposit' ? 'Depósito' : 'Retiro';
   const canApprove = transaction.status === 'pending';
+  const pmType = transaction.metadata?.payment_method_type as string | undefined;
+  const pmSnapshot = transaction.metadata?.payment_method_snapshot as
+    | Record<string, string | null | undefined>
+    | null
+    | undefined;
+
+  const pmRows: { label: string; value: string }[] = [];
+  if (pmSnapshot) {
+    if (pmSnapshot.alias) pmRows.push({ label: 'Alias', value: pmSnapshot.alias });
+    if (pmType === 'bank_transfer') {
+      if (pmSnapshot.bank_name) pmRows.push({ label: 'Banco', value: pmSnapshot.bank_name });
+      if (pmSnapshot.account_holder)
+        pmRows.push({ label: 'Titular', value: pmSnapshot.account_holder });
+      if (pmSnapshot.account_number)
+        pmRows.push({ label: 'Número de cuenta', value: pmSnapshot.account_number });
+      if (pmSnapshot.account_type)
+        pmRows.push({
+          label: 'Tipo de cuenta',
+          value: pmSnapshot.account_type === 'checking' ? 'Corriente' : 'Ahorro',
+        });
+      if (pmSnapshot.routing_code)
+        pmRows.push({ label: 'Código de enrutamiento', value: pmSnapshot.routing_code });
+    } else if (pmType === 'crypto') {
+      if (pmSnapshot.network) pmRows.push({ label: 'Red', value: pmSnapshot.network });
+      if (pmSnapshot.coin) pmRows.push({ label: 'Moneda', value: pmSnapshot.coin });
+      if (pmSnapshot.wallet_address)
+        pmRows.push({ label: 'Dirección', value: pmSnapshot.wallet_address });
+    }
+  }
 
   return (
     <ScrollView className="flex-1 bg-background">
@@ -117,13 +146,6 @@ export default function TransactionApprovalScreen() {
               <Text>{transaction.currency}</Text>
             </View>
 
-            {transaction.exchange_rate && (
-              <View className="flex-row justify-between">
-                <Text className="text-muted-foreground">Tipo de cambio:</Text>
-                <Text>{transaction.exchange_rate.toFixed(2)}</Text>
-              </View>
-            )}
-
             <View className="flex-row justify-between">
               <Text className="text-muted-foreground">Estado:</Text>
               <Text className="font-semibold capitalize">{transaction.status}</Text>
@@ -147,6 +169,28 @@ export default function TransactionApprovalScreen() {
             )}
           </CardContent>
         </Card>
+
+        {/* Payment Method Snapshot */}
+        {!!pmType && (
+          <Card>
+            <CardHeader>
+              <View className="flex-row items-center gap-2">
+                {pmType === 'bank_transfer' && <Building2 size={18} color="#9BA1A6" />}
+                {pmType === 'crypto' && <Coins size={18} color="#9BA1A6" />}
+                {pmType === 'branch' && <MapPin size={18} color="#9BA1A6" />}
+                <CardTitle>Método de pago</CardTitle>
+              </View>
+            </CardHeader>
+            <CardContent className="gap-3">
+              {pmRows.map((row) => (
+                <View key={row.label} className="flex-row justify-between">
+                  <Text className="text-muted-foreground">{row.label}:</Text>
+                  <Text className="max-w-[60%] text-right font-semibold">{row.value}</Text>
+                </View>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {errorMessage && (
           <Alert icon={CircleAlert} variant="destructive">
