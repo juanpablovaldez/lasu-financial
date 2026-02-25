@@ -11,3 +11,4 @@ export { OperationCard } from './operation-card';
 export { StatCard } from './stat-card';
 export { TransactionCard } from './transaction-card';
 export { UserCard } from './user-card';
+export { GainLossForm } from './gain-loss-form';

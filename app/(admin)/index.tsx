@@ -2,13 +2,16 @@ import { useRouter } from 'expo-router';
 import { RefreshControl, ScrollView, View } from 'react-native';
 
 import { AdminHeader, StatCard } from '@/components/admin';
+import { PerformanceChart } from '@/components/performance-chart';
 import { Text } from '@/components/ui/text';
 import { useAdminDashboard } from '@/hooks/queries/use-admin-dashboard';
+import { usePerformanceData } from '@/hooks/queries/use-performance-data';
 import { formatCurrency } from '@/utils/format';
 
 export default function AdminDashboardScreen() {
   const router = useRouter();
   const { data: stats, isLoading, refetch, isRefetching } = useAdminDashboard();
+  const { data: performance } = usePerformanceData();
 
   return (
     <ScrollView
@@ -102,6 +105,36 @@ export default function AdminDashboardScreen() {
                   title="Operaciones ejecutadas hoy"
                   value={formatCurrency(stats?.operations_today_usd || 0, 'USD', 'es-AR')}
                 />
+              </View>
+            </View>
+
+            {/* Performance section */}
+            <View>
+              <Text className="mb-2 text-lg font-semibold">Rendimiento (últimos 7 días)</Text>
+              <View className="gap-3">
+                {performance && performance.chartData.length > 0 && (
+                  <PerformanceChart
+                    data={performance.chartData}
+                    totalAmount={performance.netUsd}
+                    totalPercentage={performance.netPercentage}
+                  />
+                )}
+                <View className="flex-row gap-3">
+                  <View className="flex-1">
+                    <StatCard
+                      title="Ganancias totales"
+                      value={formatCurrency(performance?.totalGainsUsd || 0, 'USD', 'es-AR')}
+                      variant="success"
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <StatCard
+                      title="Pérdidas totales"
+                      value={formatCurrency(performance?.totalLossesUsd || 0, 'USD', 'es-AR')}
+                      variant="destructive"
+                    />
+                  </View>
+                </View>
               </View>
             </View>
           </>

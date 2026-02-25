@@ -34,6 +34,11 @@ const ITEMS: BottomBarItem[] = [
     icon: 'person.3.fill',
     path: '/(admin)/users',
   },
+  {
+    label: 'Rendimiento',
+    icon: 'chart.line.uptrend.xyaxis',
+    path: '/(admin)/gain-loss',
+  },
 ];
 
 export function AdminBottomBar() {

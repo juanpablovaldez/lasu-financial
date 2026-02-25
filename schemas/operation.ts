@@ -1,7 +1,15 @@
 import { z } from 'zod';
 
 // Operation types
-export const operationTypeSchema = z.enum(['buy', 'sell', 'dividend', 'fee', 'transfer']);
+export const operationTypeSchema = z.enum([
+  'buy',
+  'sell',
+  'dividend',
+  'fee',
+  'transfer',
+  'gain',
+  'loss',
+]);
 export type OperationType = z.infer<typeof operationTypeSchema>;
 
 export const operationStatusSchema = z.enum(['pending', 'completed', 'cancelled', 'failed']);
@@ -40,6 +48,7 @@ export const createOperationRequestSchema = z
     currency: currencySchema.default('USD'),
     fee_amount: z.number().min(0, 'La comisión no puede ser negativa').default(0),
     description: z.string().optional(),
+    percentage: z.number().min(0).max(100).optional(),
     // Optional fields for buy/sell operations
     instrument_id: z.number().int().optional(),
     quantity: z.number().positive().optional(),
@@ -59,6 +68,17 @@ export const createOperationRequestSchema = z
     },
     {
       message: 'Las operaciones de compra/venta requieren instrumento, cantidad y precio',
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.operation_type === 'gain' || data.operation_type === 'loss') {
+        return data.percentage !== undefined;
+      }
+      return true;
+    },
+    {
+      message: 'Las operaciones de ganancia/pérdida requieren un porcentaje',
     },
   );
 export type CreateOperationRequest = z.infer<typeof createOperationRequestSchema>;

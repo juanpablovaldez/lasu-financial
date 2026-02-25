@@ -4,48 +4,73 @@ import { ActivityIndicator, Pressable, View } from 'react-native';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
-import { useTransactions } from '@/hooks/queries/use-transactions';
+import { useUserActivity, type ActivityItem } from '@/hooks/queries/use-user-activity';
 import { cn } from '@/lib/utils';
-import type { Transaction } from '@/schemas';
 import { formatCurrency } from '@/utils/format';
 
-function TransactionItem({ item }: { item: Transaction }) {
+function ActivityItemRow({ item }: { item: ActivityItem }) {
   const router = useRouter();
-  const isDeposit = item.type === 'deposit';
-  const formattedDate = new Date(item.created_at).toLocaleDateString('es-AR', {
+  const formattedDate = new Date(item.date).toLocaleDateString('es-AR', {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
     minute: '2-digit',
   });
 
-  const locale = item.currency === 'USD' ? 'en-US' : 'es-AR';
+  const handlePress = () => {
+    if (item.kind === 'transaction') {
+      router.push(`/transaction/${item.originalId}`);
+    }
+  };
+
+  const amountFormatted = formatCurrency(item.amount, 'USD', 'en-US');
+  const sign = item.isPositive ? '+' : '-';
 
   return (
-    <Pressable onPress={() => router.push(`/transaction/${item.id}`)}>
+    <Pressable onPress={handlePress} disabled={item.kind === 'operation'}>
       <Card className="mb-2">
         <CardContent className="flex-row items-center justify-between py-4">
           <View className="gap-1">
-            <Text className="font-medium">{isDeposit ? 'Depósito' : 'Retiro'}</Text>
+            <Text className="font-medium">{item.label}</Text>
             <Text className="text-sm text-muted-foreground">{formattedDate}</Text>
-            {item.description && (
-              <Text className="text-xs text-muted-foreground">{item.description}</Text>
-            )}
           </View>
           <View className="items-end gap-1">
-            <Text
-              className={cn(
-                'text-lg font-semibold',
-                isDeposit ? 'text-green-600 dark:text-green-500' : 'text-destructive',
+            <View className="flex-row items-center gap-1.5">
+              {item.percentage !== undefined && (
+                <View
+                  className={cn(
+                    'rounded-full px-1.5 py-0.5',
+                    item.isPositive ? 'bg-green-500/10' : 'bg-red-500/10',
+                  )}
+                >
+                  <Text
+                    className={cn(
+                      'text-xs font-semibold',
+                      item.isPositive
+                        ? 'text-green-600 dark:text-green-500'
+                        : 'text-red-600 dark:text-red-500',
+                    )}
+                  >
+                    {item.isPositive ? '+' : ''}
+                    {item.percentage.toFixed(2)}%
+                  </Text>
+                </View>
               )}
-            >
-              {isDeposit ? '+' : '-'}
-              {formatCurrency(item.amount, item.currency, locale)}
-            </Text>
+              <Text
+                className={cn(
+                  'text-lg font-semibold',
+                  item.isPositive ? 'text-green-600 dark:text-green-500' : 'text-destructive',
+                )}
+              >
+                {sign}
+                {amountFormatted}
+              </Text>
+            </View>
             <Text className="text-xs capitalize text-muted-foreground">
               {item.status === 'pending' && 'Pendiente'}
               {item.status === 'completed' && 'Completado'}
               {item.status === 'failed' && 'Fallido'}
+              {item.status === 'cancelled' && 'Cancelado'}
             </Text>
           </View>
         </CardContent>
@@ -56,7 +81,7 @@ function TransactionItem({ item }: { item: Transaction }) {
 
 export function TransactionList() {
   const router = useRouter();
-  const { data: transactions, isLoading, error } = useTransactions(5);
+  const { data: activity, isLoading, error } = useUserActivity(10);
 
   if (isLoading) {
     return (
@@ -69,15 +94,15 @@ export function TransactionList() {
   if (error) {
     return (
       <View className="items-center py-8">
-        <Text className="text-destructive">Error al cargar transacciones</Text>
+        <Text className="text-destructive">Error al cargar actividad</Text>
       </View>
     );
   }
 
-  if (!transactions || transactions.length === 0) {
+  if (!activity || activity.length === 0) {
     return (
       <View className="items-center py-8">
-        <Text className="text-muted-foreground">No hay transacciones recientes</Text>
+        <Text className="text-muted-foreground">No hay actividad reciente</Text>
       </View>
     );
   }
@@ -91,8 +116,8 @@ export function TransactionList() {
         </Pressable>
       </View>
       <FlashList
-        data={transactions}
-        renderItem={({ item }) => <TransactionItem item={item} />}
+        data={activity}
+        renderItem={({ item }) => <ActivityItemRow item={item} />}
         keyExtractor={(item) => item.id}
       />
     </View>

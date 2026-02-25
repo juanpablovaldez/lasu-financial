@@ -6,6 +6,8 @@ import { operationSchema } from '@/schemas';
 
 import { adminKeys } from '../queries/use-admin-dashboard';
 import { balanceKeys } from '../queries/use-balance';
+import { userOperationKeys } from '../queries/use-user-operations';
+import { performanceKeys } from '../queries/use-performance-data';
 
 /**
  * Complete an operation (triggers balance deduction)
@@ -50,6 +52,10 @@ export function useCompleteOperation() {
 
       // Invalidate user balance
       queryClient.invalidateQueries({ queryKey: balanceKeys.balance(operation.user_id) });
+
+      // Invalidate user operations and performance data
+      queryClient.invalidateQueries({ queryKey: userOperationKeys.list(operation.user_id) });
+      queryClient.invalidateQueries({ queryKey: performanceKeys.admin() });
     },
   });
 }

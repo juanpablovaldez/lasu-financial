@@ -63,7 +63,6 @@ export function DatePicker({
           )}
         >
           <CalendarDays size={18} className="text-white" />
-          {/* @ts-expect-error: web-only <input> */}
           <input
             type="date"
             value={value ? format(value, 'yyyy-MM-dd') : ''}
