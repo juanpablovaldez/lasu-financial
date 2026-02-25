@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ScrollView, useWindowDimensions, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
 import type {
@@ -55,6 +56,9 @@ export function PaymentMethodForm({
       network: initialValues?.network ?? '',
       coin: initialValues?.coin ?? '',
       wallet_address: initialValues?.wallet_address ?? '',
+      scheduled_date: initialValues?.scheduled_date
+        ? new Date(initialValues.scheduled_date)
+        : (null as Date | null),
       is_default: initialValues?.is_default ?? false,
     },
     onSubmit: async ({ value }) => {
@@ -86,6 +90,9 @@ export function PaymentMethodForm({
         const base = {
           type: 'branch' as const,
           alias: value.alias,
+          scheduled_date: value.scheduled_date
+            ? value.scheduled_date.toISOString().split('T')[0]
+            : undefined,
           is_default: value.is_default,
         };
         onSubmit(editId ? { ...base, id: editId } : base);
@@ -339,11 +346,17 @@ export function PaymentMethodForm({
           )}
 
           {type === 'branch' && (
-            <View className="rounded-xl bg-muted px-4 py-3">
-              <Text className="text-sm text-muted-foreground">
-                No se requieren datos adicionales. El retiro o depósito se procesará en sucursal.
-              </Text>
-            </View>
+            <form.Field name="scheduled_date">
+              {(field) => (
+                <DatePicker
+                  label="Fecha de visita"
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                  minimumDate={new Date()}
+                  placeholder="Seleccionar fecha (opcional)"
+                />
+              )}
+            </form.Field>
           )}
         </View>
       </ScrollView>
