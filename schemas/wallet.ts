@@ -41,6 +41,7 @@ export const createTransactionRequestSchema = z.object({
   amount: z.number().positive('El monto debe ser mayor a 0'),
   currency: z.literal('USD'),
   description: z.string().optional(),
+  payment_method_id: z.string().uuid('Debe seleccionar un método de pago'),
 });
 
 export type CreateTransactionRequest = z.infer<typeof createTransactionRequestSchema>;

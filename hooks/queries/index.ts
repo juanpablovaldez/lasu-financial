@@ -5,6 +5,7 @@
  * @see https://tanstack.com/query/latest/docs/framework/react/guides/query-keys
  */
 export { adminKeys } from './use-admin-dashboard';
+export { paymentMethodKeys, usePaymentMethods } from './use-payment-methods';
 export { balanceKeys } from './use-balance';
 export { infiniteTransactionKeys } from './use-infinite-transactions';
 export { instrumentKeys } from './use-instruments';
