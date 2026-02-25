@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { ArrowDownToLine, ArrowUpFromLine } from 'lucide-react-native';
+import { ArrowDownToLine, ArrowUpFromLine, Building2, Coins, MapPin } from 'lucide-react-native';
 import { ActivityIndicator, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -72,6 +72,10 @@ export default function TransactionDetailScreen() {
 
   const isDeposit = transaction.type === 'deposit';
   const Icon = isDeposit ? ArrowDownToLine : ArrowUpFromLine;
+  const pmType = transaction.metadata?.payment_method_type as string | undefined;
+  const pmSnapshot = transaction.metadata?.payment_method_snapshot as
+    | { alias?: string }
+    | undefined;
 
   return (
     <View className="flex-1 bg-background" style={{ paddingBottom: insets.bottom + 16 }}>
@@ -124,6 +128,34 @@ export default function TransactionDetailScreen() {
             )}
           </CardContent>
         </Card>
+
+        {/* Payment Method */}
+        {!!pmType && (
+          <Card>
+            <CardContent className="py-2">
+              <View className="flex-row items-center gap-3 py-3">
+                <View className="h-8 w-8 items-center justify-center rounded-full bg-muted">
+                  {pmType === 'bank_transfer' && <Building2 size={16} color="#9BA1A6" />}
+                  {pmType === 'crypto' && <Coins size={16} color="#9BA1A6" />}
+                  {pmType === 'branch' && <MapPin size={16} color="#9BA1A6" />}
+                </View>
+                <View className="min-w-0 flex-1">
+                  <Text className="text-sm text-muted-foreground">Método de pago</Text>
+                  <Text className="text-sm font-medium">
+                    {pmType === 'bank_transfer'
+                      ? 'Transferencia bancaria'
+                      : pmType === 'crypto'
+                        ? 'Cripto'
+                        : 'Sucursal'}
+                  </Text>
+                  {pmSnapshot?.alias && (
+                    <Text className="text-xs text-muted-foreground">{pmSnapshot.alias}</Text>
+                  )}
+                </View>
+              </View>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Transaction ID */}
         <View className="items-center">

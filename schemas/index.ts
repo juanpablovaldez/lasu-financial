@@ -67,6 +67,17 @@ export {
   type OperationType,
 } from './operation';
 export {
+  createPaymentMethodRequestSchema,
+  paymentMethodListSchema,
+  paymentMethodSchema,
+  paymentMethodTypeSchema,
+  updatePaymentMethodRequestSchema,
+  type CreatePaymentMethodRequest,
+  type PaymentMethod,
+  type PaymentMethodType,
+  type UpdatePaymentMethodRequest,
+} from './payment-method';
+export {
   accountStatusSchema,
   activateUserRequestSchema,
   kycStatusSchema,

@@ -214,6 +214,26 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
             </View>
           </View>
 
+          {/* Navigation links */}
+          <View className="border-b border-border px-5 py-4">
+            <Text className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Cuenta
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                onClose();
+                router.push('/payment-methods');
+              }}
+              activeOpacity={0.7}
+              className="flex-row items-center gap-3 rounded-lg px-3 py-2.5"
+              accessibilityRole="button"
+              accessibilityLabel="Métodos de pago"
+            >
+              <IconSymbol name="creditcard" size={20} color="#9BA1A6" />
+              <Text className="text-base text-foreground">Métodos de pago</Text>
+            </TouchableOpacity>
+          </View>
+
           {/* Spacer */}
           <View className="flex-1" />
 

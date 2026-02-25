@@ -51,6 +51,20 @@ export default function RootLayout() {
                 headerBackTitle: 'Volver',
               }}
             />
+            <Stack.Screen
+              name="payment-methods"
+              options={{
+                title: 'Métodos de pago',
+                headerBackTitle: 'Volver',
+              }}
+            />
+            <Stack.Screen
+              name="payment-method-form"
+              options={{
+                title: 'Método de pago',
+                headerBackTitle: 'Volver',
+              }}
+            />
             <Stack.Screen name="+not-found" options={{ headerShown: false }} />
           </Stack>
           <StatusBar style="auto" />
