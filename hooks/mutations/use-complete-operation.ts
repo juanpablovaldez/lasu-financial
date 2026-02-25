@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { CompleteOperationRequest, Operation } from '@/schemas';
 import { operationSchema } from '@/schemas';
+import { toast } from '@/stores/toast-store';
 
 import { adminKeys } from '../queries/use-admin-dashboard';
 import { balanceKeys } from '../queries/use-balance';
@@ -24,7 +25,7 @@ async function completeOperation(request: CompleteOperationRequest): Promise<Ope
     .single();
 
   if (error) {
-    throw new Error(`Error completing operation: ${error.message}`);
+    throw error;
   }
 
   if (!data) {
@@ -43,6 +44,22 @@ export function useCompleteOperation() {
 
   return useMutation({
     mutationFn: completeOperation,
+    onError: (error: any) => {
+      const message: string = error?.message ?? '';
+      if (message.includes('Insufficient balance')) {
+        const match = message.match(/Required:\s*([\d.]+),\s*Available:\s*([\d.]+)/);
+        if (match) {
+          toast.error(
+            'Saldo insuficiente',
+            `Se requieren $${match[1]} pero el usuario solo tiene $${match[2]} disponibles.`,
+          );
+        } else {
+          toast.error('Saldo insuficiente', 'El usuario no tiene fondos suficientes.');
+        }
+      } else {
+        toast.error('Error al completar operación', message || 'Ocurrió un error inesperado.');
+      }
+    },
     onSuccess: (operation) => {
       // Invalidate admin queries
       queryClient.invalidateQueries({ queryKey: adminKeys.dashboard() });
