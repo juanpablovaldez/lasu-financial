@@ -19,6 +19,7 @@ export const paymentMethodSchema = z.object({
   network: z.string().nullish(),
   coin: z.string().nullish(),
   wallet_address: z.string().nullish(),
+  scheduled_date: z.string().nullish(),
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -53,6 +54,7 @@ export const createPaymentMethodRequestSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('branch'),
     alias: z.string().min(1, 'El alias es requerido'),
+    scheduled_date: z.string().optional(),
     is_default: z.boolean().optional(),
   }),
 ]);
@@ -88,6 +90,7 @@ export const updatePaymentMethodRequestSchema = z.discriminatedUnion('type', [
     id: z.string().uuid(),
     type: z.literal('branch'),
     alias: z.string().min(1, 'El alias es requerido'),
+    scheduled_date: z.string().optional(),
     is_default: z.boolean().optional(),
   }),
 ]);
