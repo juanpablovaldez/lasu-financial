@@ -8,10 +8,11 @@ import { formatDate } from '@/utils/format-date';
 
 interface TransactionCardProps {
   transaction: Transaction;
+  userName?: string | null;
   onPress?: () => void;
 }
 
-export function TransactionCard({ transaction, onPress }: TransactionCardProps) {
+export function TransactionCard({ transaction, userName, onPress }: TransactionCardProps) {
   const typeLabel = transaction.type === 'deposit' ? 'Depósito' : 'Retiro';
   const typeColor = transaction.type === 'deposit' ? 'text-green-500' : 'text-yellow-500';
 
@@ -36,7 +37,7 @@ export function TransactionCard({ transaction, onPress }: TransactionCardProps) 
 
           <View className="flex-row justify-between">
             <Text className="text-muted-foreground">Usuario:</Text>
-            <Text className="font-mono text-xs">{transaction.user_id.slice(0, 8)}...</Text>
+            <Text className="text-sm">{userName ?? '—'}</Text>
           </View>
 
           {transaction.description && (
