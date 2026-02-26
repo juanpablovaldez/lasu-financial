@@ -1,14 +1,25 @@
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { ActivityIndicator, RefreshControl, View } from 'react-native';
 
 import { TransactionCard } from '@/components/admin';
 import { Text } from '@/components/ui/text';
+import { useAdminUsers } from '@/hooks/queries/use-admin-users';
 import { usePendingTransactions } from '@/hooks/queries/use-pending-transactions';
 
 export default function PendingTransactionsScreen() {
   const router = useRouter();
   const { data: transactions, isLoading, refetch, isRefetching } = usePendingTransactions();
+  const { data: users } = useAdminUsers();
+
+  const userNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    users?.forEach((u) => {
+      if (u.full_name) map.set(u.user_id, u.full_name);
+    });
+    return map;
+  }, [users]);
 
   if (isLoading) {
     return (
@@ -36,6 +47,7 @@ export default function PendingTransactionsScreen() {
         renderItem={({ item }) => (
           <TransactionCard
             transaction={item}
+            userName={userNameMap.get(item.user_id)}
             onPress={() => router.push(`/(admin)/transactions/${item.id}` as any)}
           />
         )}
