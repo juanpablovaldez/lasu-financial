@@ -1,14 +1,107 @@
 import { useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { ActivityIndicator, ScrollView, View } from 'react-native';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { Text } from '@/components/ui/text';
+import { TextInput } from '@/components/ui/text-input';
+import {
+  useActivateUser,
+  useSuspendUser,
+  useUpdateKycStatus,
+} from '@/hooks/mutations/use-user-management';
 import { useAdminUser } from '@/hooks/queries/use-admin-users';
+import type { KycStatus } from '@/schemas';
 import { formatDate, formatDateOnly } from '@/utils/format-date';
+
+const ACCOUNT_STATUS_LABELS: Record<string, string> = {
+  active: 'Activo',
+  suspended: 'Suspendido',
+  closed: 'Cerrado',
+  pending_activation: 'Pendiente de activación',
+};
+
+const KYC_STATUS_LABELS: Record<string, string> = {
+  not_submitted: 'No enviado',
+  pending_review: 'En revisión',
+  approved: 'Aprobado',
+  rejected: 'Rechazado',
+  requires_update: 'Requiere actualización',
+};
+
+const KYC_DIALOG_LABELS: Record<
+  'approved' | 'rejected' | 'requires_update',
+  { title: string; description: (name: string) => string; action: string }
+> = {
+  approved: {
+    title: '¿Aprobar KYC?',
+    description: (name) => `Se aprobará la verificación KYC de ${name}.`,
+    action: 'Aprobar',
+  },
+  rejected: {
+    title: '¿Rechazar KYC?',
+    description: (name) => `Se rechazará la verificación KYC de ${name}.`,
+    action: 'Rechazar',
+  },
+  requires_update: {
+    title: '¿Solicitar actualización?',
+    description: (name) => `Se le solicitará a ${name} que actualice su documentación KYC.`,
+    action: 'Solicitar',
+  },
+};
 
 export default function UserDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: user, isLoading } = useAdminUser(id);
+
+  const [suspendFormVisible, setSuspendFormVisible] = useState(false);
+  const [suspendReason, setSuspendReason] = useState('');
+  const [activateDialogOpen, setActivateDialogOpen] = useState(false);
+  const [kycDialogAction, setKycDialogAction] = useState<
+    'approved' | 'rejected' | 'requires_update' | null
+  >(null);
+
+  const { mutate: suspendUser, isPending: isSuspending } = useSuspendUser();
+  const { mutate: activateUser, isPending: isActivating } = useActivateUser();
+  const { mutate: updateKyc, isPending: isUpdatingKyc } = useUpdateKycStatus();
+
+  function handleSuspend() {
+    if (!user || suspendReason.trim().length < 10) return;
+    suspendUser(
+      { user_id: user.user_id, reason: suspendReason.trim() },
+      {
+        onSuccess: () => {
+          setSuspendFormVisible(false);
+          setSuspendReason('');
+        },
+      },
+    );
+  }
+
+  function handleActivate() {
+    if (!user) return;
+    activateUser({ user_id: user.user_id }, { onSuccess: () => setActivateDialogOpen(false) });
+  }
+
+  function handleKycConfirm() {
+    if (!user || !kycDialogAction) return;
+    updateKyc(
+      { user_id: user.user_id, kyc_status: kycDialogAction as KycStatus },
+      { onSuccess: () => setKycDialogAction(null) },
+    );
+  }
 
   if (isLoading) {
     return (
@@ -27,20 +120,15 @@ export default function UserDetailScreen() {
     );
   }
 
-  const accountStatusLabels: Record<string, string> = {
-    active: 'Activo',
-    suspended: 'Suspendido',
-    closed: 'Cerrado',
-    pending_activation: 'Pendiente de activación',
-  };
+  const userName = user.full_name || user.email || 'este usuario';
+  const isSuspended = user.account_status === 'suspended';
+  const canBlock = user.account_status === 'active' || user.account_status === 'pending_activation';
+  const suspendReasonError =
+    suspendReason.trim().length > 0 && suspendReason.trim().length < 10
+      ? 'El motivo debe tener al menos 10 caracteres'
+      : undefined;
 
-  const kycStatusLabels: Record<string, string> = {
-    not_submitted: 'No enviado',
-    pending_review: 'En revisión',
-    approved: 'Aprobado',
-    rejected: 'Rechazado',
-    requires_update: 'Requiere actualización',
-  };
+  const kycDialogMeta = kycDialogAction ? KYC_DIALOG_LABELS[kycDialogAction] : null;
 
   return (
     <ScrollView className="flex-1 bg-background">
@@ -100,7 +188,7 @@ export default function UserDetailScreen() {
             <View className="flex-row justify-between">
               <Text className="text-muted-foreground">Estado:</Text>
               <Text className="font-semibold">
-                {accountStatusLabels[user.account_status] || user.account_status}
+                {ACCOUNT_STATUS_LABELS[user.account_status] || user.account_status}
               </Text>
             </View>
 
@@ -112,7 +200,7 @@ export default function UserDetailScreen() {
             )}
 
             {user.suspension_reason && (
-              <View>
+              <View className="gap-1">
                 <Text className="text-muted-foreground">Motivo de suspensión:</Text>
                 <Text>{user.suspension_reason}</Text>
               </View>
@@ -124,19 +212,76 @@ export default function UserDetailScreen() {
                 <Text className="text-xs">{formatDate(user.last_login_at, 'es-AR')}</Text>
               </View>
             )}
+
+            {(isSuspended || canBlock) && <Separator className="my-1" />}
+
+            {/* Activate action */}
+            {isSuspended && (
+              <Button
+                variant="outline"
+                disabled={isActivating}
+                onPress={() => setActivateDialogOpen(true)}
+              >
+                <Text>{isActivating ? 'Activando...' : 'Activar cuenta'}</Text>
+              </Button>
+            )}
+
+            {/* Block action */}
+            {canBlock && !suspendFormVisible && (
+              <Button variant="destructive" onPress={() => setSuspendFormVisible(true)}>
+                <Text>Bloquear cuenta</Text>
+              </Button>
+            )}
+
+            {/* Inline suspend form */}
+            {suspendFormVisible && (
+              <View className="gap-3">
+                <TextInput
+                  label="MOTIVO DE BLOQUEO"
+                  placeholder="Describe el motivo del bloqueo..."
+                  value={suspendReason}
+                  onChangeText={setSuspendReason}
+                  multiline
+                  numberOfLines={3}
+                  error={suspendReasonError}
+                  autoFocus
+                />
+                <View className="flex-row gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    disabled={isSuspending}
+                    onPress={() => {
+                      setSuspendFormVisible(false);
+                      setSuspendReason('');
+                    }}
+                  >
+                    <Text>Cancelar</Text>
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="flex-1"
+                    disabled={isSuspending || suspendReason.trim().length < 10}
+                    onPress={handleSuspend}
+                  >
+                    <Text>{isSuspending ? 'Bloqueando...' : 'Confirmar'}</Text>
+                  </Button>
+                </View>
+              </View>
+            )}
           </CardContent>
         </Card>
 
         {/* KYC info */}
         <Card>
           <CardHeader>
-            <CardTitle>Información KYC</CardTitle>
+            <CardTitle>Verificación KYC</CardTitle>
           </CardHeader>
           <CardContent className="gap-3">
             <View className="flex-row justify-between">
               <Text className="text-muted-foreground">Estado KYC:</Text>
               <Text className="font-semibold">
-                {kycStatusLabels[user.kyc_status] || user.kyc_status}
+                {KYC_STATUS_LABELS[user.kyc_status] || user.kyc_status}
               </Text>
             </View>
 
@@ -152,6 +297,35 @@ export default function UserDetailScreen() {
                 <Text className="text-muted-foreground">Aprobado el:</Text>
                 <Text className="text-xs">{formatDate(user.kyc_approved_at, 'es-AR')}</Text>
               </View>
+            )}
+
+            <Separator className="my-1" />
+
+            {/* KYC action buttons */}
+            {user.kyc_status !== 'approved' && (
+              <Button disabled={isUpdatingKyc} onPress={() => setKycDialogAction('approved')}>
+                <Text>{isUpdatingKyc ? 'Actualizando...' : 'Aprobar KYC'}</Text>
+              </Button>
+            )}
+
+            {user.kyc_status !== 'rejected' && (
+              <Button
+                variant="destructive"
+                disabled={isUpdatingKyc}
+                onPress={() => setKycDialogAction('rejected')}
+              >
+                <Text>{isUpdatingKyc ? 'Actualizando...' : 'Rechazar KYC'}</Text>
+              </Button>
+            )}
+
+            {user.kyc_status !== 'requires_update' && (
+              <Button
+                variant="outline"
+                disabled={isUpdatingKyc}
+                onPress={() => setKycDialogAction('requires_update')}
+              >
+                <Text>{isUpdatingKyc ? 'Actualizando...' : 'Solicitar actualización'}</Text>
+              </Button>
             )}
           </CardContent>
         </Card>
@@ -174,6 +348,50 @@ export default function UserDetailScreen() {
           </CardContent>
         </Card>
       </View>
+
+      {/* Activate account dialog */}
+      <AlertDialog open={activateDialogOpen} onOpenChange={setActivateDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Activar cuenta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se restaurará el acceso de {userName} a la plataforma.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              <Text>Cancelar</Text>
+            </AlertDialogCancel>
+            <AlertDialogAction onPress={handleActivate}>
+              <Text>Activar</Text>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* KYC action dialog */}
+      <AlertDialog
+        open={kycDialogAction !== null}
+        onOpenChange={(open) => !open && setKycDialogAction(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{kycDialogMeta?.title}</AlertDialogTitle>
+            <AlertDialogDescription>{kycDialogMeta?.description(userName)}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              <Text>Cancelar</Text>
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={kycDialogAction === 'rejected' ? 'bg-destructive' : undefined}
+              onPress={handleKycConfirm}
+            >
+              <Text>{kycDialogMeta?.action}</Text>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </ScrollView>
   );
 }
