@@ -1,6 +1,6 @@
 import { usePathname, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, Image, Pressable, Text, TouchableOpacity, View } from 'react-native';
 
 import {
   AlertDialog,
@@ -188,6 +188,21 @@ export function AdminSidebar({ visible, onClose }: AdminSidebarProps) {
         }}
       >
         <View className="flex-1 bg-background pt-16 shadow-2xl">
+          {/* Logo */}
+          <View className="items-center border-b border-border px-5 pb-4 pt-2">
+            <Image
+              source={require('@/assets/images/lasucompleto.png')}
+              style={{
+                width: 140,
+                height: 46,
+                tintColor: colorScheme === 'dark' ? '#ffffff' : '#000000',
+              }}
+              resizeMode="contain"
+              accessibilityLabel="Lasu Financial"
+              accessibilityRole="image"
+            />
+          </View>
+
           {/* User header */}
           <View className="border-b border-border px-5 pb-5">
             <View className="flex-row items-center gap-3">
