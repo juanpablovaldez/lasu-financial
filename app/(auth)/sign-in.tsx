@@ -4,6 +4,7 @@ import { Link, useRouter } from 'expo-router';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react-native';
 import { useState } from 'react';
 import {
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -16,6 +17,7 @@ import { Announcement } from '@/components/ui/announcement';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/text-input';
 import { useSignIn, useSignInWithOAuth } from '@/hooks/mutations/use-auth-mutations';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { supabase } from '@/lib/supabase';
 import { signInRequestSchema } from '@/schemas';
 import { useAdminStore } from '@/stores/admin-store';
@@ -24,6 +26,7 @@ import { useAdminStore } from '@/stores/admin-store';
 
 export default function SignInScreen() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
   const [showPassword, setShowPassword] = useState(false);
   const [oauthError, setOauthError] = useState<string | null>(null);
 
@@ -98,6 +101,21 @@ export default function SignInScreen() {
         contentContainerClassName="gap-6 px-6 pb-8 pt-12"
         keyboardShouldPersistTaps="handled"
       >
+        {/* Logo */}
+        <View className="items-center py-2">
+          <Image
+            source={require('@/assets/images/lasucompleto.png')}
+            style={{
+              width: 180,
+              height: 60,
+              tintColor: colorScheme === 'dark' ? '#ffffff' : '#000000',
+            }}
+            resizeMode="contain"
+            accessibilityLabel="Lasu Financial"
+            accessibilityRole="image"
+          />
+        </View>
+
         {/* Header */}
         <View className="gap-2">
           <Text className="text-left text-3xl font-bold text-foreground">Bienvenido de nuevo</Text>

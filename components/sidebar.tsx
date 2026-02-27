@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
+  Image,
   Pressable,
   ScrollView,
   Text,
@@ -156,6 +157,21 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ flexGrow: 1 }}
           >
+            {/* Logo */}
+            <View className="items-center border-b border-border px-5 pb-4 pt-2">
+              <Image
+                source={require('@/assets/images/lasucompleto.png')}
+                style={{
+                  width: 140,
+                  height: 46,
+                  tintColor: colorScheme === 'dark' ? '#ffffff' : '#000000',
+                }}
+                resizeMode="contain"
+                accessibilityLabel="Lasu Financial"
+                accessibilityRole="image"
+              />
+            </View>
+
             {/* User header */}
             <View className="border-b border-border px-5 pb-5">
               <View className="flex-row items-center gap-3">
