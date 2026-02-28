@@ -9,6 +9,14 @@ module.exports = defineConfig([
   ...queryPlugin.configs['flat/recommended'],
   prettierConfig,
   {
-    ignores: ['dist/*', 'node_modules/*', '.expo/*', 'web-build/*', 'ios/*', 'android/*'],
+    ignores: [
+      'dist/*',
+      'node_modules/*',
+      '.expo/*',
+      'web-build/*',
+      'ios/*',
+      'android/*',
+      'supabase/functions/**',
+    ],
   },
 ]);
