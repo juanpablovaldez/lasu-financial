@@ -27,9 +27,9 @@ import { useSignOut } from '@/hooks/mutations/use-auth-mutations';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppStore } from '@/stores/app-store';
 
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useDevice } from '@/hooks/use-device';
 import { useDismiss } from '@/hooks/use-dismiss';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { formatDate } from '@/utils/format-date';
 
@@ -257,10 +257,10 @@ export function Sidebar({ visible, onClose }: SidebarProps) {
                 activeOpacity={0.7}
                 className="flex-row items-center gap-3 rounded-lg px-3 py-2.5"
                 accessibilityRole="button"
-                accessibilityLabel="Métodos de pago"
+                accessibilityLabel="Métodos de fondeo"
               >
                 <IconSymbol name="creditcard" size={20} color="#9BA1A6" />
-                <Text className="text-base text-foreground">Métodos de pago</Text>
+                <Text className="text-base text-foreground">Métodos de fondeo</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>

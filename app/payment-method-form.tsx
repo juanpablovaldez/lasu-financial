@@ -74,6 +74,7 @@ export default function PaymentMethodFormScreen() {
         submitLabel={id ? 'Actualizar' : 'Guardar'}
         onSubmit={handleSubmit}
         onCancel={() => router.back()}
+        fullScreen
       />
     </View>
   );
