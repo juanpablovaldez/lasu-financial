@@ -1,6 +1,15 @@
 import { usePathname, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Image, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Animated,
+  Dimensions,
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import {
   AlertDialog,
@@ -188,130 +197,135 @@ export function AdminSidebar({ visible, onClose }: AdminSidebarProps) {
         }}
       >
         <View className="flex-1 bg-background pt-16 shadow-2xl">
-          {/* Logo */}
-          <View className="items-center border-b border-border px-5 pb-4 pt-2">
-            <Image
-              source={require('@/assets/images/lasucompleto.png')}
-              style={{
-                width: 140,
-                height: 46,
-                tintColor: colorScheme === 'dark' ? '#ffffff' : '#000000',
-              }}
-              resizeMode="contain"
-              accessibilityLabel="Lasu Financial"
-              accessibilityRole="image"
-            />
-          </View>
-
-          {/* User header */}
-          <View className="border-b border-border px-5 pb-5">
-            <View className="flex-row items-center gap-3">
-              <View className="h-14 w-14 items-center justify-center rounded-full border-2 border-primary bg-muted">
-                <Text className="text-xl font-bold text-foreground">
-                  {email?.charAt(0).toUpperCase()}
-                </Text>
-              </View>
-              <View className="min-w-0 flex-1">
-                <Text className="text-lg font-bold text-foreground" numberOfLines={1}>
-                  {displayName}
-                </Text>
-                <Text className="text-sm text-muted-foreground" numberOfLines={1}>
-                  {email}
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={onClose}
-                activeOpacity={0.7}
-                accessibilityLabel="Cerrar menú"
-                accessibilityRole="button"
-              >
-                <IconSymbol name="xmark" size={22} color="#9BA1A6" />
-              </TouchableOpacity>
+          <ScrollView
+            bounces={false}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
+            {/* Logo */}
+            <View className="items-center border-b border-border px-5 pb-4 pt-2">
+              <Image
+                source={require('@/assets/images/lasucompleto.png')}
+                style={{
+                  width: 140,
+                  height: 46,
+                  tintColor: colorScheme === 'dark' ? '#ffffff' : '#000000',
+                }}
+                resizeMode="contain"
+                accessibilityLabel="Lasu Financial"
+                accessibilityRole="image"
+              />
             </View>
-          </View>
 
-          {/* Session info */}
-          <View className="border-b border-border px-5 py-4">
-            <Text className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Sesión
-            </Text>
-            <Text className="text-sm text-foreground">Último inicio de sesión: {lastSignIn}</Text>
-          </View>
+            {/* User header */}
+            <View className="border-b border-border px-5 pb-5">
+              <View className="flex-row items-center gap-3">
+                <View className="h-14 w-14 items-center justify-center rounded-full border-2 border-primary bg-muted">
+                  <Text className="text-xl font-bold text-foreground">
+                    {email?.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+                <View className="min-w-0 flex-1">
+                  <Text className="text-lg font-bold text-foreground" numberOfLines={1}>
+                    {displayName}
+                  </Text>
+                  <Text className="text-sm text-muted-foreground" numberOfLines={1}>
+                    {email}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={onClose}
+                  activeOpacity={0.7}
+                  accessibilityLabel="Cerrar menú"
+                  accessibilityRole="button"
+                >
+                  <IconSymbol name="xmark" size={22} color="#9BA1A6" />
+                </TouchableOpacity>
+              </View>
+            </View>
 
-          {/* Navigation menu */}
-          <View className="border-b border-border px-5 py-4">
-            <Text className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Navegación
-            </Text>
-            <View className="gap-2">
-              {MENU_ITEMS.map((item) => {
-                const active =
-                  pathname === item.path || pathname === item.path.replace('/(admin)', '');
-                return (
-                  <TouchableOpacity
-                    key={item.path}
-                    onPress={() => handleMenuPress(item.path)}
-                    activeOpacity={active ? 1 : 0.7}
-                    disabled={active}
-                    className={`flex-row items-center gap-3 rounded-lg px-4 py-3 ${active ? 'bg-primary/10' : 'active:bg-muted'}`}
-                  >
-                    <IconSymbol
-                      name={item.icon as any}
-                      size={20}
-                      color={active ? (colorScheme === 'dark' ? '#ffffff' : '#000000') : '#9BA1A6'}
-                    />
-                    <UIText
-                      className={`text-base ${active ? 'font-semibold text-primary' : 'text-foreground'}`}
+            {/* Session info */}
+            <View className="border-b border-border px-5 py-4">
+              <Text className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Sesión
+              </Text>
+              <Text className="text-sm text-foreground">Último inicio de sesión: {lastSignIn}</Text>
+            </View>
+
+            {/* Navigation menu */}
+            <View className="border-b border-border px-5 py-4">
+              <Text className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Navegación
+              </Text>
+              <View className="gap-2">
+                {MENU_ITEMS.map((item) => {
+                  const active =
+                    pathname === item.path || pathname === item.path.replace('/(admin)', '');
+                  return (
+                    <TouchableOpacity
+                      key={item.path}
+                      onPress={() => handleMenuPress(item.path)}
+                      activeOpacity={active ? 1 : 0.7}
+                      disabled={active}
+                      className={`flex-row items-center gap-3 rounded-lg px-4 py-3 ${active ? 'bg-primary/10' : 'active:bg-muted'}`}
                     >
-                      {item.label}
-                    </UIText>
-                  </TouchableOpacity>
-                );
-              })}
+                      <IconSymbol
+                        name={item.icon as any}
+                        size={20}
+                        color={
+                          active ? (colorScheme === 'dark' ? '#ffffff' : '#000000') : '#9BA1A6'
+                        }
+                      />
+                      <UIText
+                        className={`text-base ${active ? 'font-semibold text-primary' : 'text-foreground'}`}
+                      >
+                        {item.label}
+                      </UIText>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
             </View>
-          </View>
 
-          {/* Theme switcher */}
-          <View className="border-b border-border px-5 py-4">
-            <Text className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Apariencia
-            </Text>
-            <View className="flex-row gap-2">
-              {themeModes.map(({ mode, label, icon }) => {
-                const isActive = themeMode === mode;
-                return (
-                  <TouchableOpacity
-                    key={mode}
-                    onPress={() => setThemeMode(mode)}
-                    activeOpacity={0.7}
-                    className={`flex-1 flex-row items-center justify-center gap-1.5 rounded-lg py-2.5 ${
-                      isActive ? 'bg-primary/10' : 'bg-muted'
-                    }`}
-                  >
-                    <IconSymbol
-                      name={icon}
-                      size={16}
-                      color={
-                        isActive ? (colorScheme === 'dark' ? '#ffffff' : '#000000') : '#9BA1A6'
-                      }
-                    />
-                    <Text
-                      className={`text-xs font-medium ${
-                        isActive ? 'text-primary' : 'text-muted-foreground'
+            {/* Theme switcher */}
+            <View className="px-5 py-4">
+              <Text className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Apariencia
+              </Text>
+              <View className="flex-row gap-2">
+                {themeModes.map(({ mode, label, icon }) => {
+                  const isActive = themeMode === mode;
+                  return (
+                    <TouchableOpacity
+                      key={mode}
+                      onPress={() => setThemeMode(mode)}
+                      activeOpacity={0.7}
+                      className={`flex-1 flex-row items-center justify-center gap-1.5 rounded-lg py-2.5 ${
+                        isActive ? 'bg-primary/10' : 'bg-muted'
                       }`}
                     >
-                      {label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
+                      <IconSymbol
+                        name={icon}
+                        size={16}
+                        color={
+                          isActive ? (colorScheme === 'dark' ? '#ffffff' : '#000000') : '#9BA1A6'
+                        }
+                      />
+                      <Text
+                        className={`text-xs font-medium ${
+                          isActive ? 'text-primary' : 'text-muted-foreground'
+                        }`}
+                      >
+                        {label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
             </View>
-          </View>
+          </ScrollView>
 
-          {/* Spacer */}
-          <View className="flex-1" />
-
-          {/* Sign out button */}
+          {/* Sign out button — fixed at bottom, always visible */}
           <View className={`border-t border-border px-5 ${isPhone ? 'py-8' : 'py-4'}`}>
             <TouchableOpacity
               onPress={() => setShowSignOutDialog(true)}
