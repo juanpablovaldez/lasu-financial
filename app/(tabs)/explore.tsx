@@ -4,7 +4,6 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BalanceCard } from '@/components/balance-card';
-import { PerformanceChart } from '@/components/performance-chart';
 import { TransactionDialog } from '@/components/transaction-dialog';
 import { TransactionList } from '@/components/transaction-list';
 import { balanceKeys } from '@/hooks/queries/use-balance';
@@ -40,16 +39,8 @@ export default function WalletScreen() {
           <BalanceCard
             onDeposit={() => setDepositOpen(true)}
             onWithdraw={() => setWithdrawOpen(true)}
+            netPercentage={performance?.chartData.length ? performance.netPercentage : undefined}
           />
-
-          {/* Performance Chart */}
-          {performance && performance.chartData.length > 0 && (
-            <PerformanceChart
-              data={performance.chartData}
-              totalAmount={performance.netUsd}
-              totalPercentage={performance.netPercentage}
-            />
-          )}
 
           {/* Transaction History */}
           <TransactionList />
