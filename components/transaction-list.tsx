@@ -1,7 +1,7 @@
-import { FlashList } from '@shopify/flash-list';
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { useUserActivity, type ActivityItem } from '@/hooks/queries/use-user-activity';
@@ -10,7 +10,7 @@ import { formatCurrency } from '@/utils/format';
 
 function ActivityItemRow({ item }: { item: ActivityItem }) {
   const router = useRouter();
-  const formattedDate = new Date(item.date).toLocaleDateString('es-AR', {
+  const formattedDate = new Date(item.date).toLocaleDateString(undefined, {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
@@ -23,7 +23,7 @@ function ActivityItemRow({ item }: { item: ActivityItem }) {
     }
   };
 
-  const amountFormatted = formatCurrency(item.amount, 'USD', 'en-US');
+  const amountFormatted = formatCurrency(item.amount, 'USD');
   const sign = item.isPositive ? '+' : '-';
 
   return (
@@ -80,8 +80,7 @@ function ActivityItemRow({ item }: { item: ActivityItem }) {
 }
 
 export function TransactionList() {
-  const router = useRouter();
-  const { data: activity, isLoading, error } = useUserActivity(10);
+  const { data: activity, isLoading, error } = useUserActivity(5);
 
   if (isLoading) {
     return (
@@ -108,18 +107,23 @@ export function TransactionList() {
   }
 
   return (
-    <View className="flex-1">
-      <View className="mb-4 flex-row items-center justify-between gap-2">
+    <View>
+      <View className="mb-3 flex-row items-center justify-between">
         <Text className="text-lg font-semibold">Actividad reciente</Text>
-        <Pressable onPress={() => router.push('/transactions')}>
-          <Text className="text-sm text-primary-500">Ver todas</Text>
-        </Pressable>
+        <Link href="/transactions" asChild>
+          <Button variant="ghost" size="sm">
+            <Text>Ver todas</Text>
+          </Button>
+        </Link>
       </View>
-      <FlashList
-        data={activity}
-        renderItem={({ item }) => <ActivityItemRow item={item} />}
-        keyExtractor={(item) => item.id}
-      />
+      {activity.map((item) => (
+        <ActivityItemRow key={item.id} item={item} />
+      ))}
+      <Link href="/transactions" asChild>
+        <Button variant="outline" className="mt-3 w-full">
+          <Text>Ver todas las transacciones</Text>
+        </Button>
+      </Link>
     </View>
   );
 }

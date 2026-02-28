@@ -3,14 +3,10 @@
  *
  * @param amount - The numeric amount to format
  * @param currency - ISO 4217 currency code (default: 'USD')
- * @param locale - BCP 47 locale string (default: 'en-US')
+ * @param locale - BCP 47 locale string (default: device locale)
  * @returns Formatted currency string (e.g., "$1,234.56")
  */
-export function formatCurrency(
-  amount: number,
-  currency: string = 'USD',
-  locale: string = 'en-US',
-): string {
+export function formatCurrency(amount: number, currency: string = 'USD', locale?: string): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
