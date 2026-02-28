@@ -1,0 +1,8 @@
+# Supabase project configuration
+# https://supabase.com/docs/guides/cli/config
+
+[functions.notify-admin-on-transaction]
+# The built-in gateway JWT verification only supports legacy HS256.
+# This project uses ES256 (asymmetric) — verification is done manually
+# inside the function using the JWKS endpoint.
+verify_jwt = false

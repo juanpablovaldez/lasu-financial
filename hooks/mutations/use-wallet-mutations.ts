@@ -61,7 +61,21 @@ async function createTransaction(
     throw new Error(`Transaction failed: ${error.message}`);
   }
 
-  return transactionSchema.parse(data);
+  const transaction = transactionSchema.parse(data);
+
+  supabase.functions
+    .invoke('notify-admin-on-transaction', {
+      body: {
+        transaction_id: transaction.id,
+        user_id: userId,
+        type: transaction.type,
+        amount: transaction.amount,
+        currency: transaction.currency,
+      },
+    })
+    .catch(() => {});
+
+  return transaction;
 }
 
 type CreateTransactionArgs = {
