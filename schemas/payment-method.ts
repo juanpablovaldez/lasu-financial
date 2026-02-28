@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const paymentMethodTypeSchema = z.enum(['bank_transfer', 'crypto', 'branch']);
+export const paymentMethodTypeSchema = z.enum(['bank_transfer', 'crypto', 'branch', 'custom']);
 export type PaymentMethodType = z.infer<typeof paymentMethodTypeSchema>;
 
 export const paymentMethodSchema = z.object({
@@ -57,6 +57,12 @@ export const createPaymentMethodRequestSchema = z.discriminatedUnion('type', [
     scheduled_date: z.string().optional(),
     is_default: z.boolean().optional(),
   }),
+  z.object({
+    type: z.literal('custom'),
+    alias: z.string().min(1, 'El alias es requerido'),
+    scheduled_date: z.string().min(1, 'La fecha de depósito es requerida'),
+    is_default: z.boolean().optional(),
+  }),
 ]);
 
 export type CreatePaymentMethodRequest = z.infer<typeof createPaymentMethodRequestSchema>;
@@ -91,6 +97,13 @@ export const updatePaymentMethodRequestSchema = z.discriminatedUnion('type', [
     type: z.literal('branch'),
     alias: z.string().min(1, 'El alias es requerido'),
     scheduled_date: z.string().optional(),
+    is_default: z.boolean().optional(),
+  }),
+  z.object({
+    id: z.string().uuid(),
+    type: z.literal('custom'),
+    alias: z.string().min(1, 'El alias es requerido'),
+    scheduled_date: z.string().min(1, 'La fecha de depósito es requerida'),
     is_default: z.boolean().optional(),
   }),
 ]);

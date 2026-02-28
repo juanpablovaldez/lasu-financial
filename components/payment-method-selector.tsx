@@ -1,4 +1,4 @@
-import { Building2, Coins, MapPin } from 'lucide-react-native';
+import { Building2, Coins, MapPin, Wallet } from 'lucide-react-native';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
@@ -10,12 +10,14 @@ const TYPE_ICONS: Record<PaymentMethodType, typeof Building2> = {
   bank_transfer: Building2,
   crypto: Coins,
   branch: MapPin,
+  custom: Wallet,
 };
 
 const TYPE_LABELS: Record<PaymentMethodType, string> = {
   bank_transfer: 'Transferencia bancaria',
   crypto: 'Cripto',
   branch: 'Sucursal',
+  custom: 'Personalizado',
 };
 
 function methodSubtitle(method: PaymentMethod): string {
@@ -30,6 +32,11 @@ function methodSubtitle(method: PaymentMethod): string {
     if (method.coin) parts.push(method.coin);
     if (method.network) parts.push(method.network);
     return parts.join(' · ') || TYPE_LABELS.crypto;
+  }
+  if (method.type === 'custom') {
+    return method.scheduled_date
+      ? `Fecha de depósito: ${method.scheduled_date}`
+      : TYPE_LABELS.custom;
   }
   return TYPE_LABELS.branch;
 }
