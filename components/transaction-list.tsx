@@ -110,7 +110,7 @@ export function TransactionList() {
     <View>
       <View className="mb-3 flex-row items-center justify-between">
         <Text className="text-lg font-semibold">Actividad reciente</Text>
-        <Link href="/transactions" asChild>
+        <Link href="/(tabs)/transactions" asChild>
           <Button variant="ghost" size="sm">
             <Text>Ver todas</Text>
           </Button>
@@ -119,7 +119,7 @@ export function TransactionList() {
       {activity.map((item) => (
         <ActivityItemRow key={item.id} item={item} />
       ))}
-      <Link href="/transactions" asChild>
+      <Link href="/(tabs)/transactions" asChild>
         <Button variant="outline" className="mt-3 w-full">
           <Text>Ver todas las transacciones</Text>
         </Button>

@@ -38,13 +38,6 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="(admin)" options={{ headerShown: false }} />
             <Stack.Screen
-              name="transactions"
-              options={{
-                title: 'Todas las transacciones',
-                headerBackTitle: 'Volver',
-              }}
-            />
-            <Stack.Screen
               name="transaction/[id]"
               options={{
                 title: 'Detalle de transacción',
