@@ -56,7 +56,7 @@ export const TextInput = React.forwardRef<RNTextInput, TextInputProps>(
 
         <View
           className={cn(
-            'flex-row items-center gap-3 rounded-xl bg-input px-4 py-3.5',
+            'flex-row items-center gap-3 rounded-xl bg-input px-4 py-3 md:py-2.5',
             error && 'border border-destructive',
           )}
         >

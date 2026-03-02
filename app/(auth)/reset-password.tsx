@@ -65,7 +65,7 @@ export default function ResetPasswordScreen() {
     >
       <ScrollView
         className="flex-1"
-        contentContainerClassName="gap-6 px-6 pb-8 pt-12"
+        contentContainerClassName="mx-auto w-full max-w-md gap-6 px-6 pb-8 pt-12"
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}

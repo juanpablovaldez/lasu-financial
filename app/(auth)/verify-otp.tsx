@@ -139,7 +139,7 @@ export default function VerifyOtpScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1 bg-background"
     >
-      <View className="flex-1 gap-8 px-6 pb-8 pt-12">
+      <View className="mx-auto w-full max-w-md flex-1 gap-8 px-6 pb-8 pt-12">
         {/* Header */}
         <View className="gap-2">
           <Text className="text-3xl font-bold text-foreground">Verifica tu correo</Text>
