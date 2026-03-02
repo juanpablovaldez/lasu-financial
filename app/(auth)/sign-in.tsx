@@ -1,5 +1,5 @@
-import { useForm } from '@tanstack/react-form';
 import { Ionicons } from '@expo/vector-icons';
+import { useForm } from '@tanstack/react-form';
 import { Link, useRouter } from 'expo-router';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react-native';
 import { useState } from 'react';
@@ -98,7 +98,7 @@ export default function SignInScreen() {
     >
       <ScrollView
         className="flex-1"
-        contentContainerClassName="gap-6 px-6 pb-8 pt-12"
+        contentContainerClassName="mx-auto w-full max-w-md gap-6 px-6 pb-8 pt-12"
         keyboardShouldPersistTaps="handled"
       >
         {/* Logo */}

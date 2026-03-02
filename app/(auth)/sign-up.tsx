@@ -1,5 +1,5 @@
-import { useForm } from '@tanstack/react-form';
 import { Ionicons } from '@expo/vector-icons';
+import { useForm } from '@tanstack/react-form';
 import { Link, useRouter } from 'expo-router';
 import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react-native';
 import { useState } from 'react';
@@ -17,7 +17,7 @@ import { z } from 'zod';
 import { Announcement } from '@/components/ui/announcement';
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/text-input';
-import { useSignUp, useSignInWithOAuth } from '@/hooks/mutations/use-auth-mutations';
+import { useSignInWithOAuth, useSignUp } from '@/hooks/mutations/use-auth-mutations';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { signUpRequestSchema } from '@/schemas';
 
@@ -84,7 +84,7 @@ export default function SignUpScreen() {
     >
       <ScrollView
         className="flex-1"
-        contentContainerClassName="gap-6 px-6 pb-8 pt-12"
+        contentContainerClassName="mx-auto w-full max-w-md gap-6 px-6 pb-8 pt-12"
         keyboardShouldPersistTaps="handled"
       >
         {/* Logo */}
