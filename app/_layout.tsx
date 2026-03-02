@@ -14,8 +14,19 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { NAV_THEME } from '@/lib/constants';
 import { AuthProvider } from '@/providers/auth-provider';
 import { QueryProvider } from '@/providers/query-provider';
+import * as Sentry from '@sentry/react-native';
 
-export default function RootLayout() {
+Sentry.init({
+  dsn: 'https://e10f7df8f39993398515cc3e3f0c33d1@o4510976541786112.ingest.us.sentry.io/4510976553451520',
+  sendDefaultPii: true,
+  enableLogs: true,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1,
+  integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+  // spotlight: __DEV__,
+});
+
+export default Sentry.wrap(function RootLayout() {
   const colorScheme = useColorScheme();
   const { setColorScheme } = useNativeWindColorScheme();
   const [loaded] = useFonts({
@@ -68,4 +79,4 @@ export default function RootLayout() {
       </AuthProvider>
     </QueryProvider>
   );
-}
+});

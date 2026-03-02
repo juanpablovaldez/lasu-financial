@@ -1,8 +1,8 @@
-const { getDefaultConfig } = require('expo/metro-config');
 const { withNativeWind } = require('nativewind/metro');
+const { getSentryExpoConfig } = require('@sentry/react-native/metro');
 
 /** @type {import('expo/metro-config').MetroConfig} */
-const config = getDefaultConfig(__dirname);
+const config = getSentryExpoConfig(__dirname);
 
 // On web, force zustand/middleware to resolve to CJS instead of ESM.
 // The ESM build uses import.meta.env which isn't valid in Metro's

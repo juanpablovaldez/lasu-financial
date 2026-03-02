@@ -86,3 +86,4 @@ app-example
 
 supabase/.temp
 .mcp.json
+.env.local
