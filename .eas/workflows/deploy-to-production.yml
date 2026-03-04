@@ -1,0 +1,8 @@
+name: Deploy to production
+
+jobs:
+  deploy_website:
+    name: Deploy website
+    type: deploy
+    params:
+      channel: production
