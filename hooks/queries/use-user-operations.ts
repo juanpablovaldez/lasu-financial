@@ -17,7 +17,7 @@ async function fetchUserOperations(userId: string): Promise<Operation[]> {
     .from('operations')
     .select('*')
     .eq('user_id', userId)
-    .in('operation_type', ['gain', 'loss'])
+    .in('operation_type', ['ganancia', 'perdida'])
     .order('created_at', { ascending: false });
 
   if (error) {

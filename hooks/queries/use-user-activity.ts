@@ -40,19 +40,26 @@ export function useUserActivity(limit = 10) {
     }
 
     for (const op of operations ?? []) {
-      const isGain = op.operation_type === 'gain';
+      const isPositive = op.operation_type === 'ganancia' || op.operation_type === 'ingreso';
       const percentage =
         op.metadata && typeof op.metadata === 'object' && 'percentage' in op.metadata
           ? Number(op.metadata.percentage)
           : undefined;
 
+      const OPERATION_LABELS: Record<string, string> = {
+        ganancia: 'Ganancia',
+        perdida: 'Pérdida',
+        ingreso: 'Ingreso',
+        egreso: 'Egreso',
+      };
+
       items.push({
         id: `op-${op.id}`,
         date: op.created_at,
         kind: 'operation',
-        label: isGain ? 'Ganancia' : 'Pérdida',
+        label: OPERATION_LABELS[op.operation_type] ?? op.operation_type,
         amount: op.total_amount_usd,
-        isPositive: isGain,
+        isPositive,
         status: op.status,
         percentage,
         originalId: op.id,

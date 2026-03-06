@@ -18,7 +18,7 @@ async function fetchUserPerformanceData(userId: string): Promise<PerformanceData
     .from('operations')
     .select('operation_type, total_amount_usd, created_at')
     .eq('user_id', userId)
-    .in('operation_type', ['gain', 'loss'])
+    .in('operation_type', ['ganancia', 'perdida'])
     .eq('status', 'completed')
     .gte('created_at', sevenDaysAgo.toISOString())
     .order('created_at', { ascending: true });

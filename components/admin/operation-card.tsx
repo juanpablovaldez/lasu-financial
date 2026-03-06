@@ -7,11 +7,10 @@ import { formatCurrency } from '@/utils/format';
 import { formatDate } from '@/utils/format-date';
 
 const TYPE_LABELS: Record<string, string> = {
-  buy: 'Compra',
-  sell: 'Venta',
-  dividend: 'Dividendo',
-  fee: 'Comisión',
-  transfer: 'Transferencia',
+  ingreso: 'Ingreso',
+  egreso: 'Egreso',
+  ganancia: 'Ganancia',
+  perdida: 'Pérdida',
 };
 
 const STATUS_COLORS: Record<string, string> = {

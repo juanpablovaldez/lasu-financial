@@ -36,16 +36,14 @@ export function GainLossForm() {
 
   const form = useForm({
     defaultValues: {
-      operation_type: 'gain' as 'gain' | 'loss',
+      operation_type: 'ganancia' as 'ganancia' | 'perdida',
       total_amount_usd: '',
-      percentage: '',
       description: '',
     },
     onSubmit: async ({ value }) => {
       if (!selectedUser) return;
 
       const amount = parseFloat(value.total_amount_usd);
-      const pct = parseFloat(value.percentage);
 
       const parsed = createOperationRequestSchema.safeParse({
         user_id: selectedUser.user_id,
@@ -54,7 +52,6 @@ export function GainLossForm() {
         currency: 'USD',
         fee_amount: 0,
         description: value.description || undefined,
-        percentage: pct,
       });
 
       if (!parsed.success) return;
@@ -155,30 +152,32 @@ export function GainLossForm() {
               </Text>
               <View className="flex-row gap-3">
                 <TouchableOpacity
-                  onPress={() => field.handleChange('gain')}
+                  onPress={() => field.handleChange('ganancia')}
                   activeOpacity={0.7}
                   className={`flex-1 items-center rounded-xl py-3 ${
-                    field.state.value === 'gain' ? 'bg-green-500' : 'border border-border bg-card'
+                    field.state.value === 'ganancia'
+                      ? 'bg-green-500'
+                      : 'border border-border bg-card'
                   }`}
                 >
                   <Text
                     className={`font-semibold ${
-                      field.state.value === 'gain' ? 'text-white' : 'text-foreground'
+                      field.state.value === 'ganancia' ? 'text-white' : 'text-foreground'
                     }`}
                   >
                     Ganancia
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => field.handleChange('loss')}
+                  onPress={() => field.handleChange('perdida')}
                   activeOpacity={0.7}
                   className={`flex-1 items-center rounded-xl py-3 ${
-                    field.state.value === 'loss' ? 'bg-red-500' : 'border border-border bg-card'
+                    field.state.value === 'perdida' ? 'bg-red-500' : 'border border-border bg-card'
                   }`}
                 >
                   <Text
                     className={`font-semibold ${
-                      field.state.value === 'loss' ? 'text-white' : 'text-foreground'
+                      field.state.value === 'perdida' ? 'text-white' : 'text-foreground'
                     }`}
                   >
                     Pérdida
@@ -194,19 +193,6 @@ export function GainLossForm() {
           {(field) => (
             <TextInput
               label="Monto (USD)"
-              placeholder="0.00"
-              value={field.state.value}
-              onChangeText={field.handleChange}
-              keyboardType="decimal-pad"
-            />
-          )}
-        </form.Field>
-
-        {/* Percentage */}
-        <form.Field name="percentage">
-          {(field) => (
-            <TextInput
-              label="Porcentaje (%)"
               placeholder="0.00"
               value={field.state.value}
               onChangeText={field.handleChange}
@@ -233,13 +219,13 @@ export function GainLossForm() {
             <Button
               onPress={() => form.handleSubmit()}
               disabled={isPending || !selectedUser}
-              className={opType === 'gain' ? 'bg-green-500' : 'bg-red-500'}
+              className={opType === 'ganancia' ? 'bg-green-500' : 'bg-red-500'}
             >
               {isPending ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
                 <Text className="font-semibold text-white">
-                  {opType === 'gain' ? 'Cargar ganancia' : 'Cargar pérdida'}
+                  {opType === 'ganancia' ? 'Cargar ganancia' : 'Cargar pérdida'}
                 </Text>
               )}
             </Button>

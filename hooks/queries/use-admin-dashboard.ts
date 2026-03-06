@@ -16,6 +16,8 @@ export const adminKeys = {
   auditLogs: () => [...adminKeys.all, 'audit-logs'] as const,
   users: () => [...adminKeys.all, 'users'] as const,
   userDetail: (id: string) => [...adminKeys.users(), id] as const,
+  usersFinancials: () => [...adminKeys.all, 'users-financials'] as const,
+  userOperations: (id: string) => [...adminKeys.users(), id, 'operations'] as const,
 };
 
 /**

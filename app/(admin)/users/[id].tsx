@@ -23,7 +23,9 @@ import {
   useUpdateKycStatus,
 } from '@/hooks/mutations/use-user-management';
 import { useAdminUser } from '@/hooks/queries/use-admin-users';
+import { useAdminUserOperations } from '@/hooks/queries/use-admin-operations';
 import type { KycStatus } from '@/schemas';
+import { formatCurrency } from '@/utils/format';
 import { formatDate, formatDateOnly } from '@/utils/format-date';
 
 const ACCOUNT_STATUS_LABELS: Record<string, string> = {
@@ -65,6 +67,7 @@ const KYC_DIALOG_LABELS: Record<
 export default function UserDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: user, isLoading } = useAdminUser(id);
+  const { data: operations } = useAdminUserOperations(id);
 
   const [suspendFormVisible, setSuspendFormVisible] = useState(false);
   const [suspendReason, setSuspendReason] = useState('');
@@ -326,6 +329,48 @@ export default function UserDetailScreen() {
               >
                 <Text>{isUpdatingKyc ? 'Actualizando...' : 'Solicitar actualización'}</Text>
               </Button>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Operations */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Operaciones</CardTitle>
+          </CardHeader>
+          <CardContent className="gap-3">
+            {!operations || operations.length === 0 ? (
+              <Text className="text-muted-foreground">Sin operaciones registradas</Text>
+            ) : (
+              operations.map((op, index) => (
+                <View key={op.id}>
+                  {index > 0 && <Separator className="mb-3" />}
+                  <View className="flex-row justify-between">
+                    <Text className="font-medium capitalize">
+                      {op.operation_type === 'ingreso'
+                        ? 'Ingreso'
+                        : op.operation_type === 'egreso'
+                          ? 'Egreso'
+                          : op.operation_type}
+                    </Text>
+                    <Text
+                      className={`font-semibold ${op.operation_type === 'ingreso' ? 'text-green-500' : 'text-destructive'}`}
+                    >
+                      {op.operation_type === 'ingreso' ? '+' : '-'}
+                      {formatCurrency(op.total_amount_usd)}
+                    </Text>
+                  </View>
+                  <View className="mt-1 flex-row justify-between">
+                    <Text className="text-xs text-muted-foreground">
+                      {formatDate(op.created_at, 'es-AR')}
+                    </Text>
+                    <Text className="text-xs capitalize text-muted-foreground">{op.status}</Text>
+                  </View>
+                  {op.description && (
+                    <Text className="mt-1 text-xs text-muted-foreground">{op.description}</Text>
+                  )}
+                </View>
+              ))
             )}
           </CardContent>
         </Card>

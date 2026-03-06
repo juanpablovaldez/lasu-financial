@@ -60,3 +60,32 @@ export function useOperation(id: string) {
     enabled: !!id,
   });
 }
+
+/**
+ * Fetch all operations for a specific user (admin view)
+ */
+async function fetchUserOperations(userId: string): Promise<Operation[]> {
+  const { data, error } = await supabase
+    .from('operations')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(`Error fetching user operations: ${error.message}`);
+  }
+
+  return operationListSchema.parse(data);
+}
+
+/**
+ * Query hook for all operations of a specific user (admin view).
+ */
+export function useAdminUserOperations(userId: string) {
+  return useQuery({
+    queryKey: adminKeys.userOperations(userId),
+    queryFn: () => fetchUserOperations(userId),
+    enabled: !!userId,
+    staleTime: 30_000,
+  });
+}

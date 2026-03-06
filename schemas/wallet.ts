@@ -45,3 +45,17 @@ export const createTransactionRequestSchema = z.object({
 });
 
 export type CreateTransactionRequest = z.infer<typeof createTransactionRequestSchema>;
+
+// Financial Summary Schema
+export const userFinancialSummarySchema = z.object({
+  user_id: z.string().uuid(),
+  current_balance: z.number(),
+  total_deposited: z.number(),
+  total_withdrawn: z.number(),
+  total_fees: z.number(),
+  net_invested: z.number(),
+  rentability_usd: z.number(),
+  rentability_pct: z.number(),
+});
+
+export type UserFinancialSummary = z.infer<typeof userFinancialSummarySchema>;

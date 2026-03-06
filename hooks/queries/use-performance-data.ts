@@ -33,11 +33,11 @@ export function buildCumulativeChartData(
 
   for (const row of rows) {
     const date = row.created_at.split('T')[0];
-    const delta = row.operation_type === 'gain' ? row.total_amount_usd : -row.total_amount_usd;
+    const delta = row.operation_type === 'ganancia' ? row.total_amount_usd : -row.total_amount_usd;
 
     byDate.set(date, (byDate.get(date) ?? 0) + delta);
 
-    if (row.operation_type === 'gain') {
+    if (row.operation_type === 'ganancia') {
       totalGainsUsd += row.total_amount_usd;
     } else {
       totalLossesUsd += row.total_amount_usd;
@@ -76,7 +76,7 @@ async function fetchPerformanceData(): Promise<PerformanceData> {
   const { data, error } = await supabase
     .from('operations')
     .select('operation_type, total_amount_usd, created_at')
-    .in('operation_type', ['gain', 'loss'])
+    .in('operation_type', ['ganancia', 'perdida'])
     .eq('status', 'completed')
     .gte('created_at', sevenDaysAgo.toISOString())
     .order('created_at', { ascending: true });

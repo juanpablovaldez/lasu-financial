@@ -14,9 +14,6 @@ async function createOperation(
   request: CreateOperationRequest,
   executedBy: string,
 ): Promise<Operation> {
-  const metadata =
-    request.percentage !== undefined ? { percentage: request.percentage } : undefined;
-
   const { data, error } = await supabase
     .from('operations')
     .insert({
@@ -28,11 +25,6 @@ async function createOperation(
       description: request.description || null,
       status: 'pending',
       executed_by: executedBy,
-      // Optional instrument details for buy/sell
-      instrument_id: request.instrument_id || null,
-      quantity: request.quantity || null,
-      price_per_unit: request.price_per_unit || null,
-      ...(metadata ? { metadata } : {}),
     })
     .select()
     .single();

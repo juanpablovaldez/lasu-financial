@@ -2,71 +2,21 @@ import { Pressable, View } from 'react-native';
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
-import type { UserProfile } from '@/schemas';
+import type { UserFinancialSummary, UserProfile } from '@/schemas';
+import { formatCurrency, formatPercentage } from '@/utils/format';
 import { formatDateOnly } from '@/utils/format-date';
 
 interface UserCardProps {
   user: UserProfile;
+  financials?: UserFinancialSummary;
   onPress?: () => void;
 }
 
-function getAccountStatusColor(status: string) {
-  switch (status) {
-    case 'active':
-      return 'text-green-500';
-    case 'suspended':
-      return 'text-destructive';
-    case 'closed':
-      return 'text-muted-foreground';
-    case 'pending_activation':
-      return 'text-yellow-500';
-    default:
-      return 'text-muted-foreground';
-  }
-}
-
-function getAccountStatusLabel(status: string) {
-  switch (status) {
-    case 'active':
-      return 'Activo';
-    case 'suspended':
-      return 'Suspendido';
-    case 'closed':
-      return 'Cerrado';
-    case 'pending_activation':
-      return 'Pendiente';
-    default:
-      return status;
-  }
-}
-
-function getKycStatusLabel(status: string) {
-  switch (status) {
-    case 'not_submitted':
-      return 'No enviado';
-    case 'pending_review':
-      return 'En revisión';
-    case 'approved':
-      return 'Aprobado';
-    case 'rejected':
-      return 'Rechazado';
-    case 'requires_update':
-      return 'Requiere actualización';
-    default:
-      return status;
-  }
-}
-
-export function UserCard({ user, onPress }: UserCardProps) {
+export function UserCard({ user, financials, onPress }: UserCardProps) {
   const content = (
     <Card className="mb-3">
       <CardHeader>
-        <View className="flex-row items-center justify-between">
-          <Text className="font-semibold">{user.full_name || 'Sin nombre'}</Text>
-          <Text className={`text-xs font-semibold ${getAccountStatusColor(user.account_status)}`}>
-            {getAccountStatusLabel(user.account_status)}
-          </Text>
-        </View>
+        <Text className="font-semibold">{user.full_name || 'Sin nombre'}</Text>
       </CardHeader>
       <CardContent>
         <View className="gap-2">
@@ -78,14 +28,41 @@ export function UserCard({ user, onPress }: UserCardProps) {
           )}
 
           <View className="flex-row justify-between">
-            <Text className="text-muted-foreground">KYC:</Text>
-            <Text className="text-sm">{getKycStatusLabel(user.kyc_status)}</Text>
-          </View>
-
-          <View className="flex-row justify-between">
             <Text className="text-muted-foreground">Registro:</Text>
             <Text className="text-xs">{formatDateOnly(user.created_at, 'es-AR')}</Text>
           </View>
+
+          {financials && (
+            <>
+              <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Balance:</Text>
+                <Text className="text-sm font-semibold">
+                  {formatCurrency(financials.current_balance)}
+                </Text>
+              </View>
+
+              <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Capital aportado:</Text>
+                <Text className="text-sm">{formatCurrency(financials.net_invested)}</Text>
+              </View>
+
+              <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Rendimiento:</Text>
+                <View className="items-end">
+                  <Text
+                    className={`text-sm font-semibold ${financials.rentability_usd >= 0 ? 'text-green-500' : 'text-destructive'}`}
+                  >
+                    {formatCurrency(financials.rentability_usd)}
+                  </Text>
+                  <Text
+                    className={`text-xs ${financials.rentability_pct >= 0 ? 'text-green-500' : 'text-destructive'}`}
+                  >
+                    {formatPercentage(financials.rentability_pct / 100)}
+                  </Text>
+                </View>
+              </View>
+            </>
+          )}
         </View>
       </CardContent>
     </Card>

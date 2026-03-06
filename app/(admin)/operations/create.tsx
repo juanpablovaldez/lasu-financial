@@ -8,36 +8,35 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
+import { useCompleteOperation } from '@/hooks/mutations/use-complete-operation';
 import { useCreateOperation } from '@/hooks/mutations/use-create-operation';
 import { createOperationRequestSchema } from '@/schemas';
 
 const OPERATION_TYPES = [
-  { value: 'buy', label: 'Compra' },
-  { value: 'sell', label: 'Venta' },
-  { value: 'dividend', label: 'Dividendo' },
-  { value: 'fee', label: 'Comisión' },
-  { value: 'transfer', label: 'Transferencia' },
+  { value: 'ingreso', label: 'Ingreso' },
+  { value: 'egreso', label: 'Egreso' },
+  { value: 'ganancia', label: 'Ganancia' },
+  { value: 'perdida', label: 'Pérdida' },
 ] as const;
+
+type OperationTypeValue = (typeof OPERATION_TYPES)[number]['value'];
 
 export default function CreateOperationScreen() {
   const router = useRouter();
-  const { mutate: createOperation, isPending } = useCreateOperation();
+  const { mutateAsync: createOperation, isPending: isCreating } = useCreateOperation();
+  const { mutateAsync: completeOperation, isPending: isCompleting } = useCompleteOperation();
+  const isPending = isCreating || isCompleting;
   const [alertMessage, setAlertMessage] = useState<{ title: string; description: string } | null>(
     null,
   );
 
   const [selectedUserId, setSelectedUserId] = useState('');
-  const [operationType, setOperationType] = useState<string>('buy');
+  const [operationType, setOperationType] = useState<OperationTypeValue>('ingreso');
   const [totalAmountUsd, setTotalAmountUsd] = useState('');
   const [feeAmount, setFeeAmount] = useState('');
   const [description, setDescription] = useState('');
-  const [instrumentId, setInstrumentId] = useState('');
-  const [quantity, setQuantity] = useState('');
-  const [pricePerUnit, setPricePerUnit] = useState('');
 
-  const isBuySell = operationType === 'buy' || operationType === 'sell';
-
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const rawData = {
       user_id: selectedUserId,
       operation_type: operationType,
@@ -45,11 +44,6 @@ export default function CreateOperationScreen() {
       currency: 'USD',
       fee_amount: parseFloat(feeAmount) || 0,
       description: description.trim() || undefined,
-      ...(isBuySell && {
-        instrument_id: parseInt(instrumentId, 10) || undefined,
-        quantity: parseFloat(quantity) || undefined,
-        price_per_unit: parseFloat(pricePerUnit) || undefined,
-      }),
     };
 
     const result = createOperationRequestSchema.safeParse(rawData);
@@ -64,14 +58,16 @@ export default function CreateOperationScreen() {
     }
 
     setAlertMessage(null);
-    createOperation(result.data, {
-      onSuccess: () => {
-        router.back();
-      },
-      onError: (error) => {
-        setAlertMessage({ title: 'Error', description: error.message });
-      },
-    });
+    try {
+      const operation = await createOperation(result.data);
+      await completeOperation({ operation_id: operation.id });
+      router.back();
+    } catch (error: any) {
+      setAlertMessage({
+        title: 'Error',
+        description: error?.message ?? 'Ocurrió un error inesperado',
+      });
+    }
   };
 
   return (
@@ -85,7 +81,7 @@ export default function CreateOperationScreen() {
         {/* Operation type */}
         <View className="gap-1">
           <Text className="text-sm font-medium text-muted-foreground">Tipo de operación</Text>
-          <View className="flex-row flex-wrap gap-2">
+          <View className="flex-row gap-2">
             {OPERATION_TYPES.map(({ value, label }) => (
               <Button
                 key={value}
@@ -131,41 +127,6 @@ export default function CreateOperationScreen() {
             multiline
           />
         </View>
-
-        {/* Conditional buy/sell fields */}
-        {isBuySell && (
-          <>
-            <View className="gap-1">
-              <Text className="text-sm font-medium text-muted-foreground">ID de instrumento</Text>
-              <TextInput
-                value={instrumentId}
-                onChangeText={setInstrumentId}
-                placeholder="ID numérico del instrumento"
-                keyboardType="number-pad"
-              />
-            </View>
-
-            <View className="gap-1">
-              <Text className="text-sm font-medium text-muted-foreground">Cantidad</Text>
-              <TextInput
-                value={quantity}
-                onChangeText={setQuantity}
-                placeholder="0"
-                keyboardType="decimal-pad"
-              />
-            </View>
-
-            <View className="gap-1">
-              <Text className="text-sm font-medium text-muted-foreground">Precio por unidad</Text>
-              <TextInput
-                value={pricePerUnit}
-                onChangeText={setPricePerUnit}
-                placeholder="0.00"
-                keyboardType="decimal-pad"
-              />
-            </View>
-          </>
-        )}
 
         {alertMessage && (
           <Alert icon={CircleAlert} variant="destructive">

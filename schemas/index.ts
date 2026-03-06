@@ -32,9 +32,11 @@ export {
   createTransactionRequestSchema,
   transactionListSchema,
   transactionSchema,
+  userFinancialSummarySchema,
   type Balance,
   type CreateTransactionRequest,
   type Transaction,
+  type UserFinancialSummary,
 } from './wallet';
 export {
   adminDashboardStatsSchema,

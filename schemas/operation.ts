@@ -1,15 +1,7 @@
 import { z } from 'zod';
 
 // Operation types
-export const operationTypeSchema = z.enum([
-  'buy',
-  'sell',
-  'dividend',
-  'fee',
-  'transfer',
-  'gain',
-  'loss',
-]);
+export const operationTypeSchema = z.enum(['ingreso', 'egreso', 'ganancia', 'perdida']);
 export type OperationType = z.infer<typeof operationTypeSchema>;
 
 export const operationStatusSchema = z.enum(['pending', 'completed', 'cancelled', 'failed']);
@@ -18,11 +10,11 @@ export type OperationStatus = z.infer<typeof operationStatusSchema>;
 export const currencySchema = z.literal('USD');
 export type Currency = z.infer<typeof currencySchema>;
 
-// Operation record
+// Operation record — operation_type accepts any string to tolerate legacy DB values
 export const operationSchema = z.object({
   id: z.string().uuid(),
   user_id: z.string().uuid(),
-  operation_type: operationTypeSchema,
+  operation_type: z.string(),
   instrument_id: z.number().int().nullish(),
   quantity: z.number().nullish(),
   price_per_unit: z.number().nullish(),
@@ -40,47 +32,14 @@ export const operationSchema = z.object({
 export type Operation = z.infer<typeof operationSchema>;
 
 // Create operation request
-export const createOperationRequestSchema = z
-  .object({
-    user_id: z.string().uuid('Debe seleccionar un usuario válido'),
-    operation_type: operationTypeSchema,
-    total_amount_usd: z.number().positive('El monto debe ser mayor a 0'),
-    currency: currencySchema.default('USD'),
-    fee_amount: z.number().min(0, 'La comisión no puede ser negativa').default(0),
-    description: z.string().optional(),
-    percentage: z.number().min(0).max(100).optional(),
-    // Optional fields for buy/sell operations
-    instrument_id: z.number().int().optional(),
-    quantity: z.number().positive().optional(),
-    price_per_unit: z.number().positive().optional(),
-  })
-  .refine(
-    (data) => {
-      // If operation is buy/sell, require instrument details
-      if (data.operation_type === 'buy' || data.operation_type === 'sell') {
-        return (
-          data.instrument_id !== undefined &&
-          data.quantity !== undefined &&
-          data.price_per_unit !== undefined
-        );
-      }
-      return true;
-    },
-    {
-      message: 'Las operaciones de compra/venta requieren instrumento, cantidad y precio',
-    },
-  )
-  .refine(
-    (data) => {
-      if (data.operation_type === 'gain' || data.operation_type === 'loss') {
-        return data.percentage !== undefined;
-      }
-      return true;
-    },
-    {
-      message: 'Las operaciones de ganancia/pérdida requieren un porcentaje',
-    },
-  );
+export const createOperationRequestSchema = z.object({
+  user_id: z.string().uuid('Debe seleccionar un usuario válido'),
+  operation_type: operationTypeSchema,
+  total_amount_usd: z.number().positive('El monto debe ser mayor a 0'),
+  currency: currencySchema.default('USD'),
+  fee_amount: z.number().min(0, 'La comisión no puede ser negativa').default(0),
+  description: z.string().optional(),
+});
 export type CreateOperationRequest = z.infer<typeof createOperationRequestSchema>;
 
 // Complete operation request
