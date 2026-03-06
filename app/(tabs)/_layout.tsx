@@ -40,7 +40,7 @@ export default function TabLayout() {
       <Sidebar visible={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+          tabBarActiveTintColor: Colors[colorScheme ?? 'dark'].tint,
           headerShown: false,
           tabBarButton: HapticTab,
           tabBarBackground: TabBarBackground,
