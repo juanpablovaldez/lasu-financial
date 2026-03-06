@@ -11,7 +11,14 @@ async function createClient(request: CreateClientRequest): Promise<void> {
   });
 
   if (error) {
-    throw new Error(`Error al crear el cliente: ${error.message}`);
+    let message = error.message;
+    try {
+      const body = await (error as any).context?.json?.();
+      message = body?.error ?? body?.message ?? message;
+    } catch {
+      // ignore parse errors
+    }
+    throw new Error(message);
   }
 }
 

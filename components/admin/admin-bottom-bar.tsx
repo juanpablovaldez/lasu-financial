@@ -1,43 +1,38 @@
 import { usePathname, useRouter } from 'expo-router';
+import { ArrowLeftRight, Briefcase, Home, Users } from 'lucide-react-native';
 import { Platform, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Text } from '@/components/ui/text';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useDevice } from '@/hooks/use-device';
 
 interface BottomBarItem {
   label: string;
-  icon: string;
+  icon: any;
   path: string;
 }
 
 const ITEMS: BottomBarItem[] = [
   {
     label: 'Inicio',
-    icon: 'chart.bar.fill',
+    icon: Home,
     path: '/(admin)',
   },
   {
     label: 'Transacciones',
-    icon: 'arrow.left.arrow.right',
+    icon: ArrowLeftRight,
     path: '/(admin)/transactions',
   },
   {
     label: 'Operaciones',
-    icon: 'briefcase.fill',
+    icon: Briefcase,
     path: '/(admin)/operations',
   },
   {
     label: 'Usuarios',
-    icon: 'person.3.fill',
+    icon: Users,
     path: '/(admin)/users',
-  },
-  {
-    label: 'Rendimiento',
-    icon: 'chart.line.uptrend.xyaxis',
-    path: '/(admin)/gain-loss',
   },
 ];
 
@@ -68,11 +63,12 @@ export function AdminBottomBar() {
         paddingBottom: Platform.OS === 'ios' ? insets.bottom : 8,
         ...(isDesktop && { maxWidth: 480, alignSelf: 'center' as const, width: '100%' as any }),
       }}
-      className="border-t border-border bg-background px-2 pt-2"
+      className="px-2 pt-2"
     >
       <View className="flex-row">
         {ITEMS.map((item) => {
           const active = isActive(item.path);
+          const Icon = item.icon;
           return (
             <TouchableOpacity
               key={item.path}
@@ -83,8 +79,7 @@ export function AdminBottomBar() {
               accessibilityLabel={item.label}
               accessibilityRole="button"
             >
-              <IconSymbol
-                name={item.icon as any}
+              <Icon
                 size={22}
                 color={active ? (colorScheme === 'dark' ? '#ffffff' : '#000000') : '#9BA1A6'}
               />

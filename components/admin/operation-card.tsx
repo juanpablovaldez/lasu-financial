@@ -13,6 +13,13 @@ const TYPE_LABELS: Record<string, string> = {
   perdida: 'Pérdida',
 };
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Pendiente',
+  completed: 'Completado',
+  cancelled: 'Cancelado',
+  failed: 'Fallido',
+};
+
 const STATUS_COLORS: Record<string, string> = {
   pending: 'text-yellow-500',
   completed: 'text-green-500',
@@ -22,17 +29,23 @@ const STATUS_COLORS: Record<string, string> = {
 
 interface OperationCardProps {
   operation: Operation;
+  userName?: string;
+  userEmail?: string;
   onPress?: () => void;
 }
 
-export function OperationCard({ operation, onPress }: OperationCardProps) {
+export function OperationCard({ operation, userName, userEmail, onPress }: OperationCardProps) {
   const content = (
     <Card className="mb-3">
       <CardHeader>
         <View className="flex-row items-center justify-between">
-          <Text className="font-semibold">{TYPE_LABELS[operation.operation_type]}</Text>
+          <View>
+            <Text className="font-semibold">{TYPE_LABELS[operation.operation_type]}</Text>
+            {userName && <Text className="text-sm text-muted-foreground">{userName}</Text>}
+            {userEmail && <Text className="text-sm text-muted-foreground">{userEmail}</Text>}
+          </View>
           <Text className={`text-xs capitalize ${STATUS_COLORS[operation.status]}`}>
-            {operation.status}
+            {STATUS_LABELS[operation.status] ?? operation.status}
           </Text>
         </View>
       </CardHeader>

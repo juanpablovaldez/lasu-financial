@@ -9,6 +9,7 @@ import { Text } from '@/components/ui/text';
 import { useCompleteOperation } from '@/hooks/mutations/use-complete-operation';
 import { useDeleteOperation } from '@/hooks/mutations/use-delete-operation';
 import { useOperation } from '@/hooks/queries/use-admin-operations';
+import { useAdminUser } from '@/hooks/queries/use-admin-users';
 import { formatCurrency } from '@/utils/format';
 import { formatDate } from '@/utils/format-date';
 
@@ -36,6 +37,7 @@ export default function OperationDetailScreen() {
   const { mutate: deleteOperation, isPending: isDeleting } = useDeleteOperation(
     operation?.user_id ?? '',
   );
+  const { data: userProfile } = useAdminUser(operation?.user_id);
 
   if (isLoading) {
     return (
@@ -122,9 +124,14 @@ export default function OperationDetailScreen() {
               </View>
             )}
 
-            <View>
-              <Text className="text-muted-foreground">ID de usuario:</Text>
-              <Text className="text-xs">{operation.user_id}</Text>
+            <View className="flex-row justify-between">
+              <Text className="text-muted-foreground">Usuario:</Text>
+              <View className="items-end">
+                <Text className="font-semibold">
+                  {userProfile?.full_name ?? userProfile?.email ?? '—'}
+                </Text>
+                <Text className="text-xs text-muted-foreground">{operation.user_id}</Text>
+              </View>
             </View>
           </CardContent>
         </Card>

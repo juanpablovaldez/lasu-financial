@@ -6,3 +6,6 @@
 # This project uses ES256 (asymmetric) — verification is done manually
 # inside the function using the JWKS endpoint.
 verify_jwt = false
+
+[functions.admin-create-client]
+verify_jwt = false

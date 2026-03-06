@@ -25,6 +25,7 @@ export default function CreateClientScreen() {
   const [country, setCountry] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
   const [role, setRole] = useState<CreateClientRole | undefined>(undefined);
+  const [initialBalance, setInitialBalance] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [alertMessage, setAlertMessage] = useState<{ title: string; description: string } | null>(
@@ -45,6 +46,8 @@ export default function CreateClientScreen() {
       return;
     }
 
+    const parsedBalance = initialBalance.trim() ? parseFloat(initialBalance.trim()) : undefined;
+
     const rawData = {
       email: email.trim().toLowerCase(),
       password,
@@ -53,6 +56,7 @@ export default function CreateClientScreen() {
       country: country.trim() || undefined,
       date_of_birth: dateOfBirth ? format(dateOfBirth, 'yyyy-MM-dd') : undefined,
       role,
+      initial_balance: parsedBalance,
     };
 
     const result = createClientRequestSchema.safeParse(rawData);
@@ -205,6 +209,25 @@ export default function CreateClientScreen() {
             maximumDate={maxDateOfBirth}
             placeholder="Seleccionar fecha"
           />
+        </View>
+
+        {/* Initial balance */}
+        <View className="gap-3">
+          <Text className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Balance inicial
+          </Text>
+          <TextInput
+            label="BALANCE INICIAL (USD, OPCIONAL)"
+            placeholder="0.00"
+            value={initialBalance}
+            onChangeText={setInitialBalance}
+            keyboardType="decimal-pad"
+            returnKeyType="done"
+            accessibilityLabel="Balance inicial en dólares"
+          />
+          <Text className="text-xs text-muted-foreground">
+            Si se especifica, se registrará un ingreso inicial por este monto al crear la cuenta.
+          </Text>
         </View>
 
         {/* Role */}

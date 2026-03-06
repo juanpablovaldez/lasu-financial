@@ -15,6 +15,7 @@ interface CreateClientPayload {
   country?: string;
   date_of_birth?: string;
   role?: 'admin' | 'viewer';
+  initial_balance?: number;
 }
 
 const corsHeaders = {
@@ -75,7 +76,8 @@ Deno.serve(async (req) => {
     return json({ error: 'Cuerpo de solicitud inválido' }, 400);
   }
 
-  const { email, password, full_name, phone, country, date_of_birth, role } = payload;
+  const { email, password, full_name, phone, country, date_of_birth, role, initial_balance } =
+    payload;
 
   if (!email || !password || !full_name) {
     return json({ error: 'Faltan campos requeridos: email, password, full_name' }, 400);
@@ -129,6 +131,47 @@ Deno.serve(async (req) => {
         {
           user_id: userId,
           warning: `Usuario creado pero no se pudo asignar el rol: ${roleError.message}`,
+        },
+        201,
+      );
+    }
+  }
+
+  // Register initial balance as a deposit transaction
+  if (initial_balance && initial_balance > 0) {
+    const { data: trx, error: trxInsertError } = await supabaseAdmin
+      .from('transactions')
+      .insert({
+        user_id: userId,
+        type: 'deposit',
+        amount: initial_balance,
+        currency: 'USD',
+        status: 'pending',
+        description: 'Balance inicial',
+      })
+      .select('id')
+      .single();
+
+    if (trxInsertError) {
+      return json(
+        {
+          user_id: userId,
+          warning: `Usuario creado pero no se pudo registrar el balance inicial: ${trxInsertError.message}`,
+        },
+        201,
+      );
+    }
+
+    const { error: trxUpdateError } = await supabaseAdmin
+      .from('transactions')
+      .update({ status: 'completed', approved_by: callerUserId })
+      .eq('id', trx.id);
+
+    if (trxUpdateError) {
+      return json(
+        {
+          user_id: userId,
+          warning: `Usuario creado pero no se pudo activar el balance inicial: ${trxUpdateError.message}`,
         },
         201,
       );

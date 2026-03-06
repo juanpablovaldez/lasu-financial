@@ -204,17 +204,24 @@ export function AdminSidebar({ visible, onClose }: AdminSidebarProps) {
           >
             {/* Logo */}
             <View className="items-center border-b border-border px-5 pb-4 pt-2">
-              <Image
-                source={require('@/assets/images/lasucompleto.png')}
-                style={{
-                  width: 140,
-                  height: 46,
-                  tintColor: colorScheme === 'dark' ? '#ffffff' : '#000000',
-                }}
-                resizeMode="contain"
-                accessibilityLabel="Lasu Financial"
-                accessibilityRole="image"
-              />
+              <TouchableOpacity
+                onPress={() => handleMenuPress('/(admin)')}
+                activeOpacity={0.7}
+                accessibilityLabel="Ir al inicio"
+                accessibilityRole="button"
+              >
+                <Image
+                  source={require('@/assets/images/lasucompleto.png')}
+                  style={{
+                    width: 140,
+                    height: 46,
+                    tintColor: colorScheme === 'dark' ? '#ffffff' : '#000000',
+                  }}
+                  resizeMode="contain"
+                  accessibilityLabel="Lasu Financial"
+                  accessibilityRole="image"
+                />
+              </TouchableOpacity>
             </View>
 
             {/* User header */}

@@ -96,6 +96,7 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@tanstack/eslint-plugin-query": "^5.91.4",
+    "@types/node": "^25.3.5",
     "@types/react": "~19.1.17",
     "babel-preset-expo": "^54.0.10",
     "eslint": "^9.25.0",

@@ -6,7 +6,7 @@ import { ActivityIndicator, RefreshControl, TouchableOpacity, View } from 'react
 import { UserCard } from '@/components/admin';
 import { Text } from '@/components/ui/text';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useAdminUsers } from '@/hooks/queries/use-admin-users';
+import { useAdminUserIds, useAdminUsers } from '@/hooks/queries/use-admin-users';
 import { useAdminUsersFinancials } from '@/hooks/queries/use-admin-users-financials';
 
 export default function UsersScreen() {
@@ -14,6 +14,7 @@ export default function UsersScreen() {
   const colorScheme = useColorScheme();
   const { data: users, isLoading, refetch, isRefetching } = useAdminUsers();
   const { data: financialsMap } = useAdminUsersFinancials();
+  const { data: adminUserIds } = useAdminUserIds();
   // primary-foreground: near-white in light mode, near-black in dark mode
   const fabIconColor = colorScheme === 'dark' ? '#171717' : '#fafafa';
 
@@ -51,7 +52,7 @@ export default function UsersScreen() {
         renderItem={({ item }) => (
           <UserCard
             user={item}
-            financials={financialsMap?.[item.user_id]}
+            financials={adminUserIds?.has(item.user_id) ? undefined : financialsMap?.[item.user_id]}
             onPress={() =>
               router.push(
                 `/(admin)/users/${item.user_id}` as any, // TODO: remove cast when Expo Router generates admin route types

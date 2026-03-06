@@ -62,5 +62,6 @@ export const createClientRequestSchema = z.object({
   country: z.string().optional(),
   date_of_birth: z.string().optional(),
   role: createClientRoleSchema.optional(),
+  initial_balance: z.number().nonnegative('El balance inicial no puede ser negativo').optional(),
 });
 export type CreateClientRequest = z.infer<typeof createClientRequestSchema>;

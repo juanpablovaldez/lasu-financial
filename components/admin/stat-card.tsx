@@ -14,15 +14,15 @@ interface StatCardProps {
 
 export function StatCard({ title, value, subtitle, variant = 'default', onPress }: StatCardProps) {
   const cardClasses = cn(
-    'border-2',
-    variant === 'primary' && 'border-primary',
-    variant === 'warning' && 'border-yellow-500',
-    variant === 'success' && 'border-green-500',
-    variant === 'destructive' && 'border-destructive',
+    'rounded-2xl',
+    variant === 'primary' && 'bg-primary/10',
+    variant === 'warning' && 'bg-yellow-500/10',
+    variant === 'success' && 'bg-green-500/10',
+    variant === 'destructive' && 'bg-destructive/10',
   );
 
   const valueClasses = cn(
-    'text-3xl font-bold',
+    'text-2xl font-bold',
     variant === 'primary' && 'text-primary',
     variant === 'warning' && 'text-yellow-500',
     variant === 'success' && 'text-green-500',
