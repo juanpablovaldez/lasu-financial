@@ -1,14 +1,19 @@
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, RefreshControl, View } from 'react-native';
+import { UserPlus } from 'lucide-react-native';
+import { ActivityIndicator, RefreshControl, TouchableOpacity, View } from 'react-native';
 
 import { UserCard } from '@/components/admin';
 import { Text } from '@/components/ui/text';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAdminUsers } from '@/hooks/queries/use-admin-users';
 
 export default function UsersScreen() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
   const { data: users, isLoading, refetch, isRefetching } = useAdminUsers();
+  // primary-foreground: near-white in light mode, near-black in dark mode
+  const fabIconColor = colorScheme === 'dark' ? '#171717' : '#fafafa';
 
   if (isLoading) {
     return (
@@ -21,8 +26,18 @@ export default function UsersScreen() {
 
   if (!users || users.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center bg-background p-4">
-        <Text className="text-center text-muted-foreground">No hay usuarios registrados</Text>
+      <View className="flex-1 bg-background">
+        <View className="flex-1 items-center justify-center p-4">
+          <Text className="text-center text-muted-foreground">No hay usuarios registrados</Text>
+        </View>
+        <TouchableOpacity
+          onPress={() => router.push('/(admin)/users/create' as any)}
+          className="absolute bottom-6 right-6 h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg"
+          accessibilityLabel="Registrar cliente"
+          accessibilityRole="button"
+        >
+          <UserPlus size={24} color={fabIconColor} />
+        </TouchableOpacity>
       </View>
     );
   }
@@ -46,6 +61,15 @@ export default function UsersScreen() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#fff" />
         }
       />
+
+      <TouchableOpacity
+        onPress={() => router.push('/(admin)/users/create' as any)}
+        className="absolute bottom-6 right-6 h-14 w-14 items-center justify-center rounded-full bg-primary shadow-lg"
+        accessibilityLabel="Registrar cliente"
+        accessibilityRole="button"
+      >
+        <UserPlus size={24} color={fabIconColor} />
+      </TouchableOpacity>
     </View>
   );
 }

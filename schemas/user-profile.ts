@@ -49,3 +49,18 @@ export const activateUserRequestSchema = z.object({
   user_id: z.string().uuid('Debe seleccionar un usuario válido'),
 });
 export type ActivateUserRequest = z.infer<typeof activateUserRequestSchema>;
+
+// Create client request (admin)
+export const createClientRoleSchema = z.enum(['admin', 'viewer']);
+export type CreateClientRole = z.infer<typeof createClientRoleSchema>;
+
+export const createClientRequestSchema = z.object({
+  email: z.string().email('Correo electrónico inválido'),
+  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
+  full_name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  phone: z.string().optional(),
+  country: z.string().optional(),
+  date_of_birth: z.string().optional(),
+  role: createClientRoleSchema.optional(),
+});
+export type CreateClientRequest = z.infer<typeof createClientRequestSchema>;
