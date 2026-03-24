@@ -43,7 +43,7 @@ interface MenuItem {
 
 const MENU_ITEMS: MenuItem[] = [
   {
-    label: 'Dashboard',
+    label: 'Inicio',
     icon: 'chart.bar.fill',
     path: '/(admin)',
   },

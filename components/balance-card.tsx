@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { Text } from '@/components/ui/text';
 import { Colors } from '@/constants/colors';
 import { useBalance } from '@/hooks/queries/use-balance';
+import { usePendingWithdrawalsTotal } from '@/hooks/queries/use-pending-withdrawals';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { formatCurrency } from '@/utils/format';
 
@@ -29,6 +30,7 @@ interface BalanceCardProps {
 
 export function BalanceCard({ onDeposit, onWithdraw, netPercentage }: BalanceCardProps) {
   const { data: balance, isLoading } = useBalance();
+  const { data: pendingWithdrawalsTotal = 0 } = usePendingWithdrawalsTotal();
   const colorScheme = useColorScheme();
   const iconColor = Colors[colorScheme ?? 'light'].icon;
 
@@ -43,13 +45,19 @@ export function BalanceCard({ onDeposit, onWithdraw, netPercentage }: BalanceCar
   }).format((netPercentage ?? 0) / 100);
 
   const formattedBalance = formatCurrency(balance?.amount_usd ?? 0, 'USD');
+  const hasPendingWithdrawals = pendingWithdrawalsTotal > 0;
+  const availableBalance = balance ? Math.max(0, balance.amount_usd - pendingWithdrawalsTotal) : 0;
 
   return (
     <Card className="border-t-2 border-t-primary">
       <Announcement message={!isLoading && balance ? `${formattedBalance} disponible` : null} />
       <CardHeader>
         <CardTitle>Balance total</CardTitle>
-        <CardDescription>Balance disponible</CardDescription>
+        <CardDescription>
+          {hasPendingWithdrawals
+            ? `Disponible: ${formatCurrency(availableBalance, 'USD')} · ${formatCurrency(pendingWithdrawalsTotal, 'USD')} en retiros pendientes`
+            : 'Balance disponible'}
+        </CardDescription>
       </CardHeader>
       <CardContent className="items-center">
         {isLoading ? (

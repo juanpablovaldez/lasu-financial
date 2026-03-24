@@ -19,6 +19,7 @@ import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
 import {
   useActivateUser,
+  useDeleteUser,
   useSuspendUser,
   useUpdateKycStatus,
 } from '@/hooks/mutations/use-user-management';
@@ -74,6 +75,7 @@ export default function UserDetailScreen() {
   const [suspendFormVisible, setSuspendFormVisible] = useState(false);
   const [suspendReason, setSuspendReason] = useState('');
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [kycDialogAction, setKycDialogAction] = useState<
     'approved' | 'rejected' | 'requires_update' | null
   >(null);
@@ -81,6 +83,7 @@ export default function UserDetailScreen() {
   const { mutate: suspendUser, isPending: isSuspending } = useSuspendUser();
   const { mutate: activateUser, isPending: isActivating } = useActivateUser();
   const { mutate: updateKyc, isPending: isUpdatingKyc } = useUpdateKycStatus();
+  const { mutate: deleteUser, isPending: isDeleting } = useDeleteUser();
 
   function handleSuspend() {
     if (!user || suspendReason.trim().length < 10) return;
@@ -408,6 +411,17 @@ export default function UserDetailScreen() {
             </View>
           </CardContent>
         </Card>
+
+        {/* Danger zone */}
+        {!isAdmin && (
+          <Button
+            variant="destructive"
+            onPress={() => setDeleteDialogOpen(true)}
+            disabled={isDeleting}
+          >
+            <Text>{isDeleting ? 'Eliminando...' : 'Eliminar cliente'}</Text>
+          </Button>
+        )}
       </View>
 
       {/* Activate account dialog */}
@@ -425,6 +439,30 @@ export default function UserDetailScreen() {
             </AlertDialogCancel>
             <AlertDialogAction onPress={handleActivate}>
               <Text>Activar</Text>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete user dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar cliente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminará el perfil de {userName}. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>
+              <Text>Cancelar</Text>
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive"
+              disabled={isDeleting}
+              onPress={() => deleteUser(user.user_id)}
+            >
+              <Text>Eliminar</Text>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { supabase } from '@/lib/supabase';
@@ -113,6 +114,38 @@ export function useUpdateKycStatus() {
     onSuccess: (user) => {
       queryClient.invalidateQueries({ queryKey: adminKeys.users() });
       queryClient.invalidateQueries({ queryKey: adminKeys.userDetail(user.user_id) });
+    },
+  });
+}
+
+// ─── Delete User (soft delete) ─────────────────────────────────────────────
+
+async function deleteUser(userId: string, adminId: string): Promise<void> {
+  const { error } = await supabase
+    .from('user_profiles')
+    .update({ deleted_at: new Date().toISOString(), deleted_by: adminId })
+    .eq('user_id', userId);
+
+  if (error) {
+    throw new Error(`Error al eliminar cliente: ${error.message}`);
+  }
+}
+
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const adminId = useAuthStore((state) => state.userId);
+
+  return useMutation({
+    mutationFn: (userId: string) => {
+      if (!adminId) throw new Error('Usuario no autenticado');
+      return deleteUser(userId, adminId);
+    },
+    onSuccess: (_, userId) => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.users() });
+      queryClient.removeQueries({ queryKey: adminKeys.userDetail(userId) });
+      queryClient.invalidateQueries({ queryKey: adminKeys.dashboard() });
+      router.back();
     },
   });
 }

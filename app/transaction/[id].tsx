@@ -1,11 +1,24 @@
 import { useLocalSearchParams } from 'expo-router';
 import { ArrowDownToLine, ArrowUpFromLine, Building2, Coins, MapPin } from 'lucide-react-native';
+import { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Text } from '@/components/ui/text';
+import { useCancelTransaction } from '@/hooks/mutations/use-cancel-transaction';
 import { useTransaction } from '@/hooks/queries/use-transaction';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/utils/format';
@@ -13,7 +26,13 @@ import { formatDate } from '@/utils/format-date';
 
 function StatusBadge({ status }: { status: string }) {
   const label =
-    status === 'pending' ? 'Pendiente' : status === 'completed' ? 'Completado' : 'Fallido';
+    status === 'pending'
+      ? 'Pendiente'
+      : status === 'completed'
+        ? 'Completado'
+        : status === 'cancelled'
+          ? 'Anulado'
+          : 'Fallido';
 
   return (
     <View
@@ -22,6 +41,7 @@ function StatusBadge({ status }: { status: string }) {
         status === 'pending' && 'bg-yellow-100 dark:bg-yellow-900/30',
         status === 'completed' && 'bg-green-100 dark:bg-green-900/30',
         status === 'failed' && 'bg-red-100 dark:bg-red-900/30',
+        status === 'cancelled' && 'bg-muted',
       )}
     >
       <Text
@@ -30,6 +50,7 @@ function StatusBadge({ status }: { status: string }) {
           status === 'pending' && 'text-yellow-700 dark:text-yellow-400',
           status === 'completed' && 'text-green-700 dark:text-green-400',
           status === 'failed' && 'text-red-700 dark:text-red-400',
+          status === 'cancelled' && 'text-muted-foreground',
         )}
       >
         {label}
@@ -51,6 +72,8 @@ export default function TransactionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const { data: transaction, isLoading, error } = useTransaction(id);
+  const { mutate: cancelTransaction, isPending: isCancelling } = useCancelTransaction();
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   if (isLoading) {
     return (
@@ -161,7 +184,48 @@ export default function TransactionDetailScreen() {
         <View className="items-center">
           <Text className="text-xs text-muted-foreground">ID: {transaction.id}</Text>
         </View>
+
+        {/* Cancel button — only for pending transactions */}
+        {transaction.status === 'pending' && (
+          <Button
+            variant="outline"
+            onPress={() => setShowCancelDialog(true)}
+            disabled={isCancelling}
+          >
+            <Text className="text-destructive">
+              {isCancelling ? 'Anulando...' : 'Anular solicitud'}
+            </Text>
+          </Button>
+        )}
       </View>
+
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Anular solicitud?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se cancelará esta solicitud de {isDeposit ? 'depósito' : 'retiro'}. Esta acción no se
+              puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isCancelling}>
+              <Text>Volver</Text>
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive"
+              disabled={isCancelling}
+              onPress={() =>
+                cancelTransaction(transaction.id, {
+                  onSuccess: () => setShowCancelDialog(false),
+                })
+              }
+            >
+              <Text>Anular</Text>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </View>
   );
 }

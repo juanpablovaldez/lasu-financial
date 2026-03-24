@@ -20,8 +20,8 @@ async function fetchAllUsers(): Promise<UserProfile[]> {
   const { data, error } = await supabase
     .from('user_profiles')
     .select('*')
-    .order('created_at', { ascending: false })
-    .limit(100);
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false });
 
   if (error) {
     throw new Error(`Error fetching users: ${error.message}`);
