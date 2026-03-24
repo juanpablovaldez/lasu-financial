@@ -8,10 +8,13 @@ export default function Root({ children }: PropsWithChildren) {
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        {/* Safari browser bar color — light mode */}
-        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-        {/* Safari browser bar color — dark mode */}
-        <meta name="theme-color" content="#151718" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#ffffff" />
+        {/* Set theme-color before React hydrates to avoid flash on Safari */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var c=localStorage.getItem('lasu-theme-color');if(c){document.querySelector('meta[name="theme-color"]').setAttribute('content',c);}}catch(e){}})();`,
+          }}
+        />
         <ScrollViewStyleReset />
       </head>
       <body>{children}</body>

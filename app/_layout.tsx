@@ -37,6 +37,16 @@ export default Sentry.wrap(function RootLayout() {
     setColorScheme(colorScheme);
   }, [colorScheme, setColorScheme]);
 
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const color = colorScheme === 'dark' ? '#151718' : '#ffffff';
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', color);
+    try {
+      localStorage.setItem('lasu-theme-color', color);
+    } catch {}
+  }, [colorScheme]);
+
   if (!loaded) {
     return null;
   }
