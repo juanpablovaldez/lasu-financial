@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
+import { useCancelOperation } from '@/hooks/mutations/use-cancel-operation';
 import { useCompleteOperation } from '@/hooks/mutations/use-complete-operation';
 import { useCreateOperation } from '@/hooks/mutations/use-create-operation';
 import { useAdminUsers } from '@/hooks/queries/use-admin-users';
@@ -21,6 +22,7 @@ export function GainLossForm() {
   const { data: users } = useAdminUsers();
   const { mutateAsync: createOperation, isPending: isCreating } = useCreateOperation();
   const { mutateAsync: completeOperation, isPending: isCompleting } = useCompleteOperation();
+  const { mutateAsync: cancelOperation } = useCancelOperation();
 
   const isPending = isCreating || isCompleting;
 
@@ -58,7 +60,12 @@ export function GainLossForm() {
 
       const operation = await createOperation(parsed.data);
 
-      await completeOperation({ operation_id: operation.id });
+      try {
+        await completeOperation({ operation_id: operation.id });
+      } catch (err) {
+        await cancelOperation(operation.id).catch(() => {});
+        throw err;
+      }
 
       form.reset();
       setSelectedUser(null);

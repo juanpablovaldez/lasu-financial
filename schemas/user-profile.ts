@@ -34,6 +34,8 @@ export const userProfileSchema = z.object({
   metadata: z.record(z.unknown()).nullish(),
   created_at: z.string(),
   updated_at: z.string(),
+  deleted_at: z.string().nullish(),
+  deleted_by: z.string().uuid().nullish(),
 });
 export type UserProfile = z.infer<typeof userProfileSchema>;
 

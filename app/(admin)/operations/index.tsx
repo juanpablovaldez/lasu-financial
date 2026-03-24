@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import { ActivityIndicator, RefreshControl, TouchableOpacity, View } from 'react-native';
 
-import { OperationCard } from '@/components/admin';
+import { AdminHeader, OperationCard } from '@/components/admin';
 import { Text } from '@/components/ui/text';
 import { useAdminOperations } from '@/hooks/queries/use-admin-operations';
 import { useAdminUsers } from '@/hooks/queries/use-admin-users';
@@ -32,6 +32,9 @@ export default function OperationsScreen() {
 
   return (
     <View className="flex-1 bg-background">
+      <View className="px-4 pt-4">
+        <AdminHeader title="Operaciones" />
+      </View>
       {!operations || operations.length === 0 ? (
         <View className="flex-1 items-center justify-center p-4">
           <Text className="text-center text-muted-foreground">No hay operaciones registradas</Text>

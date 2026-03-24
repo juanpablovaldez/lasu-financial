@@ -1,7 +1,7 @@
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { ArrowDownToLine, ArrowUpFromLine } from 'lucide-react-native';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -10,9 +10,28 @@ import { TransactionDialog } from '@/components/transaction-dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { useInfiniteTransactions } from '@/hooks/queries/use-infinite-transactions';
+import { useUserOperations } from '@/hooks/queries/use-user-operations';
 import { cn } from '@/lib/utils';
-import type { Transaction } from '@/schemas';
+import type { Operation, Transaction } from '@/schemas';
 import { formatCurrency } from '@/utils/format';
+
+type ListItem =
+  | { kind: 'transaction'; id: string; date: string; data: Transaction }
+  | { kind: 'operation'; id: string; date: string; data: Operation };
+
+const OPERATION_LABELS: Record<string, string> = {
+  ganancia: 'Ganancia',
+  perdida: 'Pérdida',
+  ingreso: 'Ingreso',
+  egreso: 'Egreso',
+  buy: 'Compra',
+  sell: 'Venta',
+  dividend: 'Dividendo',
+  fee: 'Comisión',
+  transfer: 'Transferencia',
+};
+
+const POSITIVE_TYPES = new Set(['ganancia', 'ingreso', 'dividend']);
 
 function ActionCards({ onDeposit, onWithdraw }: { onDeposit: () => void; onWithdraw: () => void }) {
   return (
@@ -41,7 +60,7 @@ function ActionCards({ onDeposit, onWithdraw }: { onDeposit: () => void; onWithd
   );
 }
 
-function TransactionItem({ item }: { item: Transaction }) {
+function TransactionRow({ item }: { item: Transaction }) {
   const router = useRouter();
   const isDeposit = item.type === 'deposit';
   const formattedDate = new Date(item.created_at).toLocaleDateString('es-AR', {
@@ -77,6 +96,7 @@ function TransactionItem({ item }: { item: Transaction }) {
               {item.status === 'pending' && 'Pendiente'}
               {item.status === 'completed' && 'Completado'}
               {item.status === 'failed' && 'Fallido'}
+              {item.status === 'cancelled' && 'Anulado'}
             </Text>
           </View>
         </CardContent>
@@ -85,14 +105,81 @@ function TransactionItem({ item }: { item: Transaction }) {
   );
 }
 
+function OperationRow({ item }: { item: Operation }) {
+  const isPositive = POSITIVE_TYPES.has(item.operation_type);
+  const label = OPERATION_LABELS[item.operation_type] ?? item.operation_type;
+  const formattedDate = new Date(item.created_at).toLocaleDateString('es-AR', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  return (
+    <Card className="mb-2">
+      <CardContent className="flex-row items-center justify-between py-4">
+        <View className="gap-1">
+          <Text className="font-medium">{label}</Text>
+          <Text className="text-sm text-muted-foreground">{formattedDate}</Text>
+          {item.description && (
+            <Text className="text-xs text-muted-foreground">{item.description}</Text>
+          )}
+        </View>
+        <View className="items-end gap-1">
+          <Text
+            className={cn(
+              'text-lg font-semibold',
+              isPositive ? 'text-green-600 dark:text-green-500' : 'text-destructive',
+            )}
+          >
+            {isPositive ? '+' : '-'}
+            {formatCurrency(item.total_amount_usd, 'USD', 'en-US')}
+          </Text>
+          <Text className="text-xs capitalize text-muted-foreground">
+            {item.status === 'pending' && 'Pendiente'}
+            {item.status === 'completed' && 'Completado'}
+            {item.status === 'cancelled' && 'Cancelado'}
+            {item.status === 'failed' && 'Fallido'}
+          </Text>
+        </View>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ListRow({ item }: { item: ListItem }) {
+  if (item.kind === 'transaction') return <TransactionRow item={item.data} />;
+  return <OperationRow item={item.data} />;
+}
+
 export default function TransactionsScreen() {
   const insets = useSafeAreaInsets();
   const [depositOpen, setDepositOpen] = useState(false);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
-  const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteTransactions();
 
-  const transactions = data?.pages.flatMap((page) => page.transactions) ?? [];
+  const {
+    data: txData,
+    isLoading: txLoading,
+    error: txError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteTransactions();
+  const { data: operations, isLoading: opLoading, error: opError } = useUserOperations();
+
+  const isLoading = txLoading || opLoading;
+  const error = txError ?? opError;
+
+  const items = useMemo<ListItem[]>(() => {
+    const result: ListItem[] = [];
+    for (const tx of txData?.pages.flatMap((p) => p.transactions) ?? []) {
+      result.push({ kind: 'transaction', id: `tx-${tx.id}`, date: tx.created_at, data: tx });
+    }
+    for (const op of operations ?? []) {
+      result.push({ kind: 'operation', id: `op-${op.id}`, date: op.created_at, data: op });
+    }
+    return result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [txData, operations]);
 
   if (isLoading) {
     return (
@@ -110,7 +197,7 @@ export default function TransactionsScreen() {
     );
   }
 
-  if (transactions.length === 0) {
+  if (items.length === 0) {
     return (
       <View className="flex-1 bg-background p-4">
         <ActionCards
@@ -131,10 +218,11 @@ export default function TransactionsScreen() {
     <>
       <View className="flex-1 bg-background">
         <FlashList
-          data={transactions}
-          renderItem={({ item }) => <TransactionItem item={item} />}
+          data={items}
+          renderItem={({ item }) => <ListRow item={item} />}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 16 }}
+          estimatedItemSize={80}
           ListHeaderComponent={
             <ActionCards
               onDeposit={() => setDepositOpen(true)}

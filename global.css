@@ -28,6 +28,11 @@
     overscroll-behavior: contain;
   }
 
+  html,
+  body {
+    background-color: hsl(var(--background));
+  }
+
   :root {
     /* Neutral base colors */
     --background: 0 0% 100%;

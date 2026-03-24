@@ -17,6 +17,7 @@ import { useCreatePaymentMethod } from '@/hooks/mutations/use-payment-method-mut
 import { useCreateTransaction } from '@/hooks/mutations/use-wallet-mutations';
 import { useBalance } from '@/hooks/queries/use-balance';
 import { usePaymentMethods } from '@/hooks/queries/use-payment-methods';
+import { usePendingWithdrawalsTotal } from '@/hooks/queries/use-pending-withdrawals';
 import type { CreatePaymentMethodRequest, UpdatePaymentMethodRequest } from '@/schemas';
 import { toast } from '@/stores/toast-store';
 
@@ -40,7 +41,8 @@ export function TransactionDialog({ open, onOpenChange, type }: TransactionDialo
     onSubmit: async ({ value }) => {
       const amount = parseFloat(value.amount);
       if (isNaN(amount) || amount <= 0) return;
-      if (type === 'withdrawal' && balance !== undefined && amount > balance.amount_usd) return;
+      if (type === 'withdrawal' && availableBalance !== undefined && amount > availableBalance)
+        return;
 
       setAmountData({ amount, description: value.description || undefined });
       setStep('select-method');
@@ -54,7 +56,11 @@ export function TransactionDialog({ open, onOpenChange, type }: TransactionDialo
   } = useCreateTransaction();
   const { mutate: createPaymentMethod, isPending: isCreatingMethod } = useCreatePaymentMethod();
   const { data: balance } = useBalance();
+  const { data: pendingWithdrawalsTotal = 0 } = usePendingWithdrawalsTotal();
   const { data: methods = [], isLoading: isLoadingMethods } = usePaymentMethods();
+
+  const availableBalance =
+    balance !== undefined ? Math.max(0, balance.amount_usd - pendingWithdrawalsTotal) : undefined;
 
   const { height } = useWindowDimensions();
   const [step, setStep] = useState<DialogStep>('amount');
@@ -89,9 +95,9 @@ export function TransactionDialog({ open, onOpenChange, type }: TransactionDialo
     if (type !== 'withdrawal') return undefined;
     const amount = parseFloat(value);
     if (isNaN(amount) || amount <= 0) return undefined;
-    if (!balance) return undefined;
-    if (amount > balance.amount_usd) {
-      return `Saldo insuficiente. Disponible: ${balance.amount_usd.toFixed(2)} USD`;
+    if (availableBalance === undefined) return undefined;
+    if (amount > availableBalance) {
+      return `Saldo disponible insuficiente. Disponible: ${availableBalance.toFixed(2)} USD`;
     }
     return undefined;
   };

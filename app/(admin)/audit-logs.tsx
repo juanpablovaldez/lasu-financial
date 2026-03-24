@@ -1,7 +1,7 @@
 import { FlashList } from '@shopify/flash-list';
 import { ActivityIndicator, RefreshControl, View } from 'react-native';
 
-import { AuditLogCard } from '@/components/admin';
+import { AdminHeader, AuditLogCard } from '@/components/admin';
 import { Text } from '@/components/ui/text';
 import { useAuditLogs } from '@/hooks/queries/use-audit-logs';
 
@@ -29,6 +29,9 @@ export default function AuditLogsScreen() {
 
   return (
     <View className="flex-1 bg-background">
+      <View className="px-4 pt-4">
+        <AdminHeader title="Auditoría" />
+      </View>
       <FlashList
         data={logs}
         renderItem={({ item }) => <AuditLogCard log={item} />}

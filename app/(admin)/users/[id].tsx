@@ -19,13 +19,15 @@ import { Text } from '@/components/ui/text';
 import { TextInput } from '@/components/ui/text-input';
 import {
   useActivateUser,
+  useDeleteUser,
   useSuspendUser,
   useUpdateKycStatus,
 } from '@/hooks/mutations/use-user-management';
 import { useAdminUser, useAdminUserRole } from '@/hooks/queries/use-admin-users';
 import { useAdminUserOperations } from '@/hooks/queries/use-admin-operations';
+import { useAdminUsersFinancials } from '@/hooks/queries/use-admin-users-financials';
 import type { KycStatus } from '@/schemas';
-import { formatCurrency } from '@/utils/format';
+import { formatCurrency, formatPercentage } from '@/utils/format';
 import { formatDate, formatDateOnly } from '@/utils/format-date';
 
 const ACCOUNT_STATUS_LABELS: Record<string, string> = {
@@ -69,11 +71,14 @@ export default function UserDetailScreen() {
   const { data: user, isLoading } = useAdminUser(id);
   const { data: operations } = useAdminUserOperations(id);
   const { data: adminRole } = useAdminUserRole(id);
+  const { data: financialsMap } = useAdminUsersFinancials();
   const isAdmin = adminRole !== null && adminRole !== undefined;
+  const financials = financialsMap?.[id];
 
   const [suspendFormVisible, setSuspendFormVisible] = useState(false);
   const [suspendReason, setSuspendReason] = useState('');
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [kycDialogAction, setKycDialogAction] = useState<
     'approved' | 'rejected' | 'requires_update' | null
   >(null);
@@ -81,6 +86,7 @@ export default function UserDetailScreen() {
   const { mutate: suspendUser, isPending: isSuspending } = useSuspendUser();
   const { mutate: activateUser, isPending: isActivating } = useActivateUser();
   const { mutate: updateKyc, isPending: isUpdatingKyc } = useUpdateKycStatus();
+  const { mutate: deleteUser, isPending: isDeleting } = useDeleteUser();
 
   function handleSuspend() {
     if (!user || suspendReason.trim().length < 10) return;
@@ -183,6 +189,58 @@ export default function UserDetailScreen() {
             </View>
           </CardContent>
         </Card>
+
+        {/* Financial summary */}
+        {financials && !isAdmin && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Resumen financiero</CardTitle>
+            </CardHeader>
+            <CardContent className="gap-3">
+              <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Balance:</Text>
+                <Text className="text-base font-bold">
+                  {formatCurrency(financials.current_balance)}
+                </Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Capital aportado:</Text>
+                <Text className="text-sm">{formatCurrency(financials.net_invested)}</Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Total depositado:</Text>
+                <Text className="text-sm">{formatCurrency(financials.total_deposited)}</Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Total retirado:</Text>
+                <Text className="text-sm">{formatCurrency(financials.total_withdrawn)}</Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Comisiones:</Text>
+                <Text className="text-sm">{formatCurrency(financials.total_fees)}</Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Rendimiento:</Text>
+                <View className="items-end gap-1">
+                  <Text
+                    className={`text-sm font-semibold ${financials.rentability_usd >= 0 ? 'text-green-500' : 'text-destructive'}`}
+                  >
+                    {formatCurrency(financials.rentability_usd)}
+                  </Text>
+                  <View
+                    className={`rounded-full px-2 py-0.5 ${financials.rentability_pct >= 0 ? 'bg-green-500/10' : 'bg-destructive/10'}`}
+                  >
+                    <Text
+                      className={`text-xs font-semibold ${financials.rentability_pct >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
+                    >
+                      {formatPercentage(financials.rentability_pct / 100)}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Account status */}
         <Card>
@@ -408,6 +466,17 @@ export default function UserDetailScreen() {
             </View>
           </CardContent>
         </Card>
+
+        {/* Danger zone */}
+        {!isAdmin && (
+          <Button
+            variant="destructive"
+            onPress={() => setDeleteDialogOpen(true)}
+            disabled={isDeleting}
+          >
+            <Text>{isDeleting ? 'Eliminando...' : 'Eliminar cliente'}</Text>
+          </Button>
+        )}
       </View>
 
       {/* Activate account dialog */}
@@ -425,6 +494,30 @@ export default function UserDetailScreen() {
             </AlertDialogCancel>
             <AlertDialogAction onPress={handleActivate}>
               <Text>Activar</Text>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete user dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar cliente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminará el perfil de {userName}. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>
+              <Text>Cancelar</Text>
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive"
+              disabled={isDeleting}
+              onPress={() => deleteUser(user.user_id)}
+            >
+              <Text>Eliminar</Text>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

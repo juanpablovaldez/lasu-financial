@@ -76,6 +76,8 @@ function StatusBadge({ status }: { status: string }) {
         return 'text-yellow-500';
       case 'failed':
         return 'text-destructive';
+      case 'cancelled':
+        return 'text-muted-foreground';
       default:
         return 'text-muted-foreground';
     }
@@ -89,6 +91,8 @@ function StatusBadge({ status }: { status: string }) {
         return 'Pendiente';
       case 'failed':
         return 'Fallida';
+      case 'cancelled':
+        return 'Anulada';
       default:
         return status;
     }

@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { useTransactionApproval } from '@/hooks/mutations/use-transaction-approval';
 import { useAdminTransaction } from '@/hooks/queries/use-admin-transaction';
+import { useAdminUser } from '@/hooks/queries/use-admin-users';
 import { formatCurrency } from '@/utils/format';
 import { formatDate } from '@/utils/format-date';
 
@@ -26,6 +27,7 @@ export default function TransactionApprovalScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { data: transaction, isLoading } = useAdminTransaction(id);
+  const { data: transactionUser } = useAdminUser(transaction?.user_id);
   const { mutate: processApproval, isPending } = useTransactionApproval();
 
   const [showApproveDialog, setShowApproveDialog] = useState(false);
@@ -156,9 +158,11 @@ export default function TransactionApprovalScreen() {
               <Text className="text-xs">{formatDate(transaction.created_at, 'es-AR')}</Text>
             </View>
 
-            <View>
-              <Text className="text-muted-foreground">ID de usuario:</Text>
-              <Text className="text-xs">{transaction.user_id}</Text>
+            <View className="flex-row justify-between">
+              <Text className="text-muted-foreground">Usuario:</Text>
+              <Text className="font-semibold">
+                {transactionUser?.full_name ?? transactionUser?.email ?? transaction.user_id}
+              </Text>
             </View>
 
             {transaction.description && (

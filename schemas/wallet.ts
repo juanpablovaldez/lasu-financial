@@ -18,7 +18,7 @@ export const transactionSchema = z.object({
   type: z.enum(['deposit', 'withdrawal']),
   amount: z.number().positive(),
   currency: z.string(),
-  status: z.enum(['pending', 'completed', 'failed']),
+  status: z.enum(['pending', 'completed', 'failed', 'cancelled']),
   description: z.string().nullish(),
   created_at: z.string(),
   completed_at: z.string().nullish(),
