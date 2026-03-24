@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { UserPlus } from 'lucide-react-native';
 import { ActivityIndicator, RefreshControl, TouchableOpacity, View } from 'react-native';
 
-import { UserCard } from '@/components/admin';
+import { AdminHeader, UserCard } from '@/components/admin';
 import { Text } from '@/components/ui/text';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAdminUserIds, useAdminUsers } from '@/hooks/queries/use-admin-users';
@@ -47,6 +47,9 @@ export default function UsersScreen() {
 
   return (
     <View className="flex-1 bg-background">
+      <View className="px-4 pt-4">
+        <AdminHeader title="Clientes" />
+      </View>
       <FlashList
         data={users}
         renderItem={({ item }) => (

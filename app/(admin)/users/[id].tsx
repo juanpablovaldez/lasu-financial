@@ -25,8 +25,9 @@ import {
 } from '@/hooks/mutations/use-user-management';
 import { useAdminUser, useAdminUserRole } from '@/hooks/queries/use-admin-users';
 import { useAdminUserOperations } from '@/hooks/queries/use-admin-operations';
+import { useAdminUsersFinancials } from '@/hooks/queries/use-admin-users-financials';
 import type { KycStatus } from '@/schemas';
-import { formatCurrency } from '@/utils/format';
+import { formatCurrency, formatPercentage } from '@/utils/format';
 import { formatDate, formatDateOnly } from '@/utils/format-date';
 
 const ACCOUNT_STATUS_LABELS: Record<string, string> = {
@@ -70,7 +71,9 @@ export default function UserDetailScreen() {
   const { data: user, isLoading } = useAdminUser(id);
   const { data: operations } = useAdminUserOperations(id);
   const { data: adminRole } = useAdminUserRole(id);
+  const { data: financialsMap } = useAdminUsersFinancials();
   const isAdmin = adminRole !== null && adminRole !== undefined;
+  const financials = financialsMap?.[id];
 
   const [suspendFormVisible, setSuspendFormVisible] = useState(false);
   const [suspendReason, setSuspendReason] = useState('');
@@ -186,6 +189,58 @@ export default function UserDetailScreen() {
             </View>
           </CardContent>
         </Card>
+
+        {/* Financial summary */}
+        {financials && !isAdmin && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Resumen financiero</CardTitle>
+            </CardHeader>
+            <CardContent className="gap-3">
+              <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Balance:</Text>
+                <Text className="text-base font-bold">
+                  {formatCurrency(financials.current_balance)}
+                </Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Capital aportado:</Text>
+                <Text className="text-sm">{formatCurrency(financials.net_invested)}</Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Total depositado:</Text>
+                <Text className="text-sm">{formatCurrency(financials.total_deposited)}</Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Total retirado:</Text>
+                <Text className="text-sm">{formatCurrency(financials.total_withdrawn)}</Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Comisiones:</Text>
+                <Text className="text-sm">{formatCurrency(financials.total_fees)}</Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-muted-foreground">Rendimiento:</Text>
+                <View className="items-end gap-1">
+                  <Text
+                    className={`text-sm font-semibold ${financials.rentability_usd >= 0 ? 'text-green-500' : 'text-destructive'}`}
+                  >
+                    {formatCurrency(financials.rentability_usd)}
+                  </Text>
+                  <View
+                    className={`rounded-full px-2 py-0.5 ${financials.rentability_pct >= 0 ? 'bg-green-500/10' : 'bg-destructive/10'}`}
+                  >
+                    <Text
+                      className={`text-xs font-semibold ${financials.rentability_pct >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
+                    >
+                      {formatPercentage(financials.rentability_pct / 100)}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Account status */}
         <Card>
